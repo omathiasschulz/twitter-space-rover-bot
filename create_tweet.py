@@ -27,19 +27,24 @@ def __twitter_client() -> Client:
     )
 
 
-def __create_tweet(message: str):
-    """Realiza a criação de um novo tweet usando o client
+def __create_tweet(message: str, in_reply_to_tweet_id: str = None) -> str:
+    """Realiza a criação de um novo tweet
     Full doc: https://docs.tweepy.org/en/latest/client.html#tweepy.Client.create_tweet
 
     Args:
-        message (str): Mensagem do tweet
+        message (str): Mensagem do tweet (No máximo 280 caracteres)
+        in_reply_to_tweet_id (str, optional): Tweet pai/Tweet que será respondido. Defaults to None.
+
+    Returns:
+        str: ID do tweet criado
     """
     client = __twitter_client()
 
-    response = client.create_tweet(text=message)
-
-    logging.info(f"response: {response}")
-    logging.info(f"response_json: {response.json()}")
+    response = client.create_tweet(
+        text=message, in_reply_to_tweet_id=in_reply_to_tweet_id
+    )
+    logging.warning(f"Tweet: https://x.com/SpaceRoverBot/status/{response.data['id']}")
+    return response.data["id"]
 
 
 def __nasa_apod() -> dict:
@@ -71,8 +76,8 @@ def __main():
         apod_info = __nasa_apod()
 
         build_message = []
+        build_message.append("Hello!!!")
         build_message.append(f"{apod_info['title']}")
-        # build_message.append(f"\n{apod_info['explanation']}")
         build_message.append(f"\nImage Link: {apod_info['hdurl']}")
 
         if apod_info.get("copyright"):
@@ -81,7 +86,13 @@ def __main():
 
         message = "\n".join(build_message)
 
-        __create_tweet(message)
+        tweet_id = __create_tweet(message)
+
+        explanation = f"Description: {apod_info['explanation']}"
+        if len(explanation) > 280:
+            explanation = f"{explanation[:277]}..."
+
+        __create_tweet(explanation, tweet_id)
 
         logging.info("Tweet posted with success!")
     except Exception as error:

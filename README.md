@@ -1,6 +1,6 @@
 # twitter-space-rover-bot
 
-[Twitter Space Rover Bot 🤖](https://twitter.com/schulz_dev)
+[Twitter Space Rover Bot 🤖](https://x.com/SpaceRoverBot)
 
 [Twitter Developers Dashboard](https://developer.twitter.com/en/portal/projects-and-apps)
 
