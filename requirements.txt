@@ -1,0 +1,2 @@
+coloredlogs==15.0.1
+tweepy==4.14.0
