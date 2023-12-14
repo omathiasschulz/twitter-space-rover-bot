@@ -70,14 +70,16 @@ def __main():
         logging.info("Starting script to create a new tweet...")
         apod_info = __nasa_apod()
 
-        copyright_to = apod_info["copyright"].replace("\n", "")
+        build_message = []
+        build_message.append(f"{apod_info['title']}")
+        # build_message.append(f"\n{apod_info['explanation']}")
+        build_message.append(f"\nImage Link: {apod_info['hdurl']}")
 
-        message = (
-            f"{apod_info['title']}"
-            # f"\n\n{apod_info['explanation']}"
-            f"\n\nImage Link: {apod_info['hdurl']}"
-            f"\n\nCopyright to: {copyright_to}"
-        )
+        if apod_info.get("copyright"):
+            copyright_to = apod_info["copyright"].replace("\n", "")
+            build_message.append(f"\nCopyright to: {copyright_to}")
+
+        message = "\n".join(build_message)
 
         __create_tweet(message)
 
