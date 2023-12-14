@@ -1,12 +1,14 @@
-"""Criação de um novo tweet"""
 import logging
 import os
+import coloredlogs
 import requests
 from dotenv import load_dotenv
 from tweepy import Client
 
 load_dotenv()
 
+# add colored logs to script
+coloredlogs.install()
 
 NASA_API_URL = "https://api.nasa.gov"
 
@@ -36,8 +38,8 @@ def __create_tweet(message: str):
 
     response = client.create_tweet(text=message)
 
-    print("response")
-    print(response)
+    logging.info(f"response: {response}")
+    logging.info(f"response_json: {response.json()}")
 
 
 def __nasa_apod() -> dict:
@@ -53,8 +55,11 @@ def __nasa_apod() -> dict:
     )
 
     data = response.json()
-    print("status_code", response.status_code)
-    print("data", data)
+
+    logging.info("NASA APOD")
+    logging.info(f"status_code: {response.status_code}")
+    logging.info(f"response: {data}")
+
     return data
 
 
@@ -62,6 +67,7 @@ def __main():
     """Criação de um novo tweet"""
 
     try:
+        logging.info("Starting script to create a new tweet...")
         apod_info = __nasa_apod()
 
         copyright_to = apod_info["copyright"].replace("\n", "")
@@ -75,7 +81,7 @@ def __main():
 
         __create_tweet(message)
 
-        print("Tweet postado com sucesso!")
+        logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
 
