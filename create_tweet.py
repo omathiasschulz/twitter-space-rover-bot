@@ -1,6 +1,8 @@
 import logging
 import os
 import uuid
+import datetime
+import locale
 import coloredlogs
 import requests
 import tweepy
@@ -11,6 +13,8 @@ load_dotenv()
 
 # add colored logs to script
 coloredlogs.install()
+
+locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
 NASA_API_URL = "https://api.nasa.gov"
 
@@ -150,13 +154,21 @@ def __main():
 
         build_message = []
         build_message.append(f"{__bold(translated_title)} ({apod_info['title']}) 🌌")
-        build_message.append(f"{apod_info['date']}")
+
+        formatted_date = datetime.datetime.strptime(
+            apod_info["date"], "%Y-%m-%d"
+        ).strftime("%d de %B de %Y")
+
+        build_message.append(
+            "\nFoto Astronômica do Dia (Astronomy Picture of the Day - APOD)"
+        )
+        build_message.append(f"Referente ao dia {__bold(formatted_date)}")
 
         if apod_info.get("copyright"):
             copyright_to = apod_info["copyright"].replace("\n", "")
-            build_message.append(f"\nCopyright: {copyright_to}")
+            build_message.append(f"Copyright: {copyright_to}")
 
-        build_message.append("#nasa #apod #astronomy")
+        build_message.append("#nasa #apod #astronomy #space #science")
         message = "\n".join(build_message)
 
         tweet_id = __create_tweet(message=message, file_url=apod_info["hdurl"])
