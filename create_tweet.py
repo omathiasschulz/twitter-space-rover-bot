@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 import coloredlogs
 import requests
 import tweepy
@@ -61,19 +62,19 @@ def __create_tweet(
 
     media_ids = None
     if file_url:
-        filename = "tmp/sample.jpg"
+        filename = f"tmp/{uuid.uuid4()}.jpg"
         request = requests.get(file_url, stream=True, timeout=5)
 
         with open(filename, "wb") as image:
             for chunk in request:
                 image.write(chunk)
 
-        # os.remove(filename)
-
         # Full doc: https://docs.tweepy.org/en/latest/api.html#tweepy.API.media_upload
         client_v1 = __twitter_client_v1()
         response_file = client_v1.media_upload(filename=filename)
         media_ids = [response_file.media_id]
+
+        os.remove(filename)
 
     response = client.create_tweet(
         text=message,
@@ -82,9 +83,6 @@ def __create_tweet(
     )
     logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{response.data['id']}")
 
-    # TODO:
-    # TODO: client.like()
-    # TODO:
     return response.data["id"]
 
 
@@ -114,7 +112,6 @@ def __main():
         apod_info = __nasa_apod()
 
         build_message = []
-        build_message.append("Hello!!!")
         build_message.append(f"{apod_info['title']}")
         build_message.append(f"\nImage Link: {apod_info['hdurl']}")
 
