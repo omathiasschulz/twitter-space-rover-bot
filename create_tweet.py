@@ -117,6 +117,27 @@ def __translator(text: str) -> str:
     return GoogleTranslator(source="en", target="pt").translate(text)
 
 
+def __bold(text: str) -> str:
+    """Transforma o texto informado em negrito para adicionar no tweet
+
+    Args:
+        text (str): Texto base
+
+    Returns:
+        str: Texto em negrito
+    """
+    output = ""
+    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    bold_chars = "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵"
+
+    for character in text:
+        if character in chars:
+            output += bold_chars[chars.index(character)]
+        else:
+            output += character
+    return output
+
+
 def __main():
     """Criação de um novo tweet"""
 
@@ -124,34 +145,39 @@ def __main():
         logging.info("Starting script to create a new tweet...")
         apod_info = __nasa_apod()
 
+        # criação do tweet principal
         translated_title = __translator(apod_info["title"])
 
         build_message = []
-        build_message.append(f"{translated_title} ({apod_info['title']})")
+        build_message.append(f"{__bold(translated_title)} ({apod_info['title']}) 🌌")
+        build_message.append(f"{apod_info['date']}")
 
         if apod_info.get("copyright"):
             copyright_to = apod_info["copyright"].replace("\n", "")
             build_message.append(f"\nCopyright: {copyright_to}")
 
+        build_message.append("#nasa #apod #astronomy")
         message = "\n".join(build_message)
 
         tweet_id = __create_tweet(message=message, file_url=apod_info["hdurl"])
 
-        translated_explanation = __translator(apod_info["explanation"])
-
-        translated_explanation = f"Explicação: {translated_explanation}"
-        if len(translated_explanation) > 245:
-            translated_explanation = (
-                f"{translated_explanation[:245]}... (Tradução não oficial)"
-            )
-
-        __create_tweet(message=translated_explanation, in_reply_to_tweet_id=tweet_id)
-
-        explanation = f"Explanation: {apod_info['explanation']}"
-        if len(explanation) > 245:
-            explanation = f"{explanation[:245]}... (Original text from NASA APOD)"
+        # criação do tweet com explicação em inglês
+        explanation = f"Explanation [🇺🇸 Original text]: {apod_info['explanation']}"
+        if len(explanation) > 240:
+            explanation = f"{explanation[:240]}..."
 
         __create_tweet(message=explanation, in_reply_to_tweet_id=tweet_id)
+
+        # criação do tweet com explicação em português
+        translated_explanation = __translator(apod_info["explanation"])
+
+        translated_explanation = (
+            f"Explicação [🇧🇷 Não oficial]: {translated_explanation}"
+        )
+        if len(translated_explanation) > 240:
+            translated_explanation = f"{translated_explanation[:240]}..."
+
+        __create_tweet(message=translated_explanation, in_reply_to_tweet_id=tweet_id)
 
         logging.info("Tweet posted with success!")
     except Exception as error:
