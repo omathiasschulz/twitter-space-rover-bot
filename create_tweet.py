@@ -3,6 +3,7 @@ import os
 import uuid
 import datetime
 import locale
+import textwrap
 import coloredlogs
 import requests
 import tweepy
@@ -173,23 +174,24 @@ def __main():
 
         tweet_id = __create_tweet(message=message, file_url=apod_info["hdurl"])
 
-        # criação do tweet com explicação em inglês
-        explanation = f"Explanation [🇺🇸 Original text]: {apod_info['explanation']}"
-        if len(explanation) > 240:
-            explanation = f"{explanation[:240]}..."
-
-        __create_tweet(message=explanation, in_reply_to_tweet_id=tweet_id)
-
         # criação do tweet com explicação em português
         translated_explanation = __translator(apod_info["explanation"])
-
         translated_explanation = (
             f"Explicação [🇧🇷 Não oficial]: {translated_explanation}"
         )
-        if len(translated_explanation) > 240:
-            translated_explanation = f"{translated_explanation[:240]}..."
+        translated_explanation_lines = textwrap.wrap(translated_explanation, width=278)
+        for line in translated_explanation_lines:
+            tweet_id = __create_tweet(
+                message=f"{line} +", in_reply_to_tweet_id=tweet_id
+            )
 
-        __create_tweet(message=translated_explanation, in_reply_to_tweet_id=tweet_id)
+        # criação do tweet com explicação em inglês
+        explanation = f"Explanation [🇺🇸 Original text]: {apod_info['explanation']}"
+        explanation_lines = textwrap.wrap(explanation, width=278)
+        for line in explanation_lines:
+            tweet_id = __create_tweet(
+                message=f"{line} +", in_reply_to_tweet_id=tweet_id
+            )
 
         logging.info("Tweet posted with success!")
     except Exception as error:
