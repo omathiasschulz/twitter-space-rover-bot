@@ -5,6 +5,7 @@ import coloredlogs
 import requests
 import tweepy
 from dotenv import load_dotenv
+from deep_translator import GoogleTranslator
 
 load_dotenv()
 
@@ -104,6 +105,18 @@ def __nasa_apod() -> dict:
     return data
 
 
+def __translator(text: str) -> str:
+    """Traduz o texto informado em inglês para português
+
+    Args:
+        text (str): Texto em inglês
+
+    Returns:
+        str: Texto em português
+    """
+    return GoogleTranslator(source="en", target="pt").translate(text)
+
+
 def __main():
     """Criação de um novo tweet"""
 
@@ -111,21 +124,32 @@ def __main():
         logging.info("Starting script to create a new tweet...")
         apod_info = __nasa_apod()
 
+        translated_title = __translator(apod_info["title"])
+
         build_message = []
-        build_message.append(f"{apod_info['title']}")
-        build_message.append(f"\nImage Link: {apod_info['hdurl']}")
+        build_message.append(f"{translated_title} ({apod_info['title']})")
 
         if apod_info.get("copyright"):
             copyright_to = apod_info["copyright"].replace("\n", "")
-            build_message.append(f"\nCopyright to: {copyright_to}")
+            build_message.append(f"\nCopyright: {copyright_to}")
 
         message = "\n".join(build_message)
 
         tweet_id = __create_tweet(message=message, file_url=apod_info["hdurl"])
 
-        explanation = f"Description: {apod_info['explanation']}"
-        if len(explanation) > 280:
-            explanation = f"{explanation[:277]}..."
+        translated_explanation = __translator(apod_info["explanation"])
+
+        translated_explanation = f"Explicação: {translated_explanation}"
+        if len(translated_explanation) > 245:
+            translated_explanation = (
+                f"{translated_explanation[:245]}... (Tradução não oficial)"
+            )
+
+        __create_tweet(message=translated_explanation, in_reply_to_tweet_id=tweet_id)
+
+        explanation = f"Explanation: {apod_info['explanation']}"
+        if len(explanation) > 245:
+            explanation = f"{explanation[:245]}... (Original text from NASA APOD)"
 
         __create_tweet(message=explanation, in_reply_to_tweet_id=tweet_id)
 

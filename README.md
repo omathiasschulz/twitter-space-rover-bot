@@ -31,3 +31,7 @@ Desativar venv: deactivate
 pip freeze > requirements.txt
 
 pip install -r requirements.txt
+
+## Translator
+
+O texto é traduzido utilizando a ferramenta [deep-translator](https://github.com/nidhaloff/deep-translator).
