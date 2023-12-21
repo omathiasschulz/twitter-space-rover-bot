@@ -59,7 +59,7 @@ def __main():
 
         nasa_api = Nasa()
         apod_info = nasa_api.apod()
-        logging.info(f"APOD [{apod_info.status_code}] > {apod_info}")
+        logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
         translated_title = __translator(apod_info["title"])
