@@ -20,18 +20,22 @@ Exemplo de consulta do dia 08 de Dezembro de 2023 até 12 de Dezembro de 2023:
 
 ## venv
 
-Python 3.9 > sudo apt install python3.9
+Python 3.10: `sudo apt install python3.10`
 
-Criar a venv: virtualenv venv --python=python3.9
+Criar a venv: `virtualenv venv --python=python3.10`
 
-Ativar venv: source venv/bin/activate
+Ativar venv: `source venv/bin/activate`
 
-Desativar venv: deactivate
+Desativar venv: `deactivate`
 
-pip freeze > requirements.txt
+Salvar as dependências do projeto: `pip freeze > requirements.txt`
 
-pip install -r requirements.txt
+Instalar as dependências: `pip install -r requirements.txt`
 
 ## Translator
 
-O texto é traduzido utilizando a ferramenta [deep-translator](https://github.com/nidhaloff/deep-translator).
+O texto é traduzido utilizando a biblioteca python [deep-translator](https://github.com/nidhaloff/deep-translator).
+
+## Image generator
+
+As imagens são geradas utilizando a biblioteca python [html2image](https://github.com/vgalin/html2image)
