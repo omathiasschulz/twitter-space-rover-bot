@@ -1,113 +1,21 @@
 import logging
-import os
-import uuid
 import datetime
 import locale
 import textwrap
 import coloredlogs
-import requests
-import tweepy
 from dotenv import load_dotenv
 from deep_translator import GoogleTranslator
+from src.nasa import Nasa
+from src.twitter import Twitter
 
+# load envs from .env file
 load_dotenv()
 
 # add colored logs to script
 coloredlogs.install()
 
+# brazilian format date
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
-
-NASA_API_URL = "https://api.nasa.gov"
-
-
-def __twitter_client() -> tweepy.Client:
-    """Inicia um client para comunicação com Twitter API v2.0
-
-    Returns:
-        tweepy.Client: Retorna o client
-    """
-    return tweepy.Client(
-        consumer_key=os.getenv("TWITTER_API_KEY"),
-        consumer_secret=os.getenv("TWITTER_API_KEY_SECRET"),
-        access_token=os.getenv("TWITTER_ACCESS_TOKEN"),
-        access_token_secret=os.getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-    )
-
-
-def __twitter_client_v1() -> tweepy.API:
-    """Inicia um client para comunicação com Twitter API v1.1
-
-    Returns:
-        tweepy.API: Retorna o client
-    """
-    auth = tweepy.OAuth1UserHandler(
-        os.getenv("TWITTER_API_KEY"), os.getenv("TWITTER_API_KEY_SECRET")
-    )
-    auth.set_access_token(
-        os.getenv("TWITTER_ACCESS_TOKEN"),
-        os.getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-    )
-    return tweepy.API(auth)
-
-
-def __create_tweet(
-    message: str, in_reply_to_tweet_id: str = None, file_url: str = None
-) -> str:
-    """Realiza a criação de um novo tweet
-    Full doc: https://docs.tweepy.org/en/latest/client.html#tweepy.Client.create_tweet
-
-    Args:
-        message (str): Mensagem do tweet (No máximo 280 caracteres)
-        in_reply_to_tweet_id (str, optional): Tweet pai/Tweet que será respondido. Defaults to None.
-        file_url (str, optional): Url da imagem para adicionar no tweet
-
-    Returns:
-        str: ID do tweet criado
-    """
-    client = __twitter_client()
-
-    media_ids = None
-    if file_url:
-        filename = f"tmp/{uuid.uuid4()}.jpg"
-        request = requests.get(file_url, stream=True, timeout=5)
-
-        with open(filename, "wb") as image:
-            for chunk in request:
-                image.write(chunk)
-
-        # Full doc: https://docs.tweepy.org/en/latest/api.html#tweepy.API.media_upload
-        client_v1 = __twitter_client_v1()
-        response_file = client_v1.media_upload(filename=filename)
-        media_ids = [response_file.media_id]
-
-        os.remove(filename)
-
-    response = client.create_tweet(
-        text=message,
-        in_reply_to_tweet_id=in_reply_to_tweet_id,
-        media_ids=media_ids,
-    )
-    logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{response.data['id']}")
-
-    return response.data["id"]
-
-
-def __nasa_apod() -> dict:
-    """Realiza a consulta do APOD (Astronomy Picture of the Day)
-
-    Returns:
-        dict: Resposta da consulta
-    """
-    api_key = os.getenv("NASA_API_KEY")
-
-    response = requests.get(
-        f"{NASA_API_URL}/planetary/apod?api_key={api_key}", timeout=5
-    )
-
-    data = response.json()
-    logging.info(f"APOD [{response.status_code}] > {data}")
-
-    return data
 
 
 def __translator(text: str) -> str:
@@ -148,7 +56,10 @@ def __main():
 
     try:
         logging.info("Starting script to create a new tweet...")
-        apod_info = __nasa_apod()
+
+        nasa_api = Nasa()
+        apod_info = nasa_api.apod()
+        logging.info(f"APOD [{apod_info.status_code}] > {apod_info}")
 
         # criação do tweet principal
         translated_title = __translator(apod_info["title"])
@@ -172,7 +83,11 @@ def __main():
         build_message.append("#nasa #apod #astronomy #space #science")
         message = "\n".join(build_message)
 
-        tweet_id = __create_tweet(message=message, file_url=apod_info["hdurl"])
+        twitter_api = Twitter()
+        tweet_id = twitter_api.create_tweet(
+            message=message, file_url=apod_info["hdurl"]
+        )
+        logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com explicação em português
         translated_explanation = __translator(apod_info["explanation"])
@@ -181,17 +96,19 @@ def __main():
         )
         translated_explanation_lines = textwrap.wrap(translated_explanation, width=278)
         for line in translated_explanation_lines:
-            tweet_id = __create_tweet(
-                message=f"{line} +", in_reply_to_tweet_id=tweet_id
+            tweet_id = twitter_api.create_tweet(
+                message=f"{line} +", in_reply_to=tweet_id
             )
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com explicação em inglês
         explanation = f"Explanation [🇺🇸 Original text]: {apod_info['explanation']}"
         explanation_lines = textwrap.wrap(explanation, width=278)
         for line in explanation_lines:
-            tweet_id = __create_tweet(
-                message=f"{line} +", in_reply_to_tweet_id=tweet_id
+            tweet_id = twitter_api.create_tweet(
+                message=f"{line} +", in_reply_to=tweet_id
             )
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         logging.info("Tweet posted with success!")
     except Exception as error:
