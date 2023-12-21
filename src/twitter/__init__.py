@@ -41,20 +41,26 @@ class Twitter:
         )
 
     def create_tweet(
-        self, message: str, in_reply_to: str = None, file_url: str = None
+        self,
+        message: str = "",
+        in_reply_to: str = None,
+        file_url: str = None,
+        filename: str = None,
     ) -> str:
         """Realiza a criação de um novo tweet
         Full doc: https://docs.tweepy.org/en/latest/client.html#tweepy.Client.create_tweet
 
         Args:
-            message (str): Mensagem do tweet (No máximo 280 caracteres)
+            message (str, optional): Mensagem do tweet (No máximo 280 caracteres). Defaults to "".
             in_reply_to (str, optional): ID Tweet pai/Tweet que será respondido. Defaults to None.
-            file_url (str, optional): Url da imagem para adicionar no tweet
+            file_url (str, optional): Url da WEB da imagem para adicionar no tweet
+            filename (str, optional): Nome da imagem na tmp/ para adicionar no tweet
 
         Returns:
             str: ID do tweet criado
         """
-        media_ids = None
+        media_ids = []
+
         if file_url:
             filename = f"tmp/{uuid.uuid4()}.jpg"
             request = requests.get(file_url, stream=True, timeout=5)
@@ -65,9 +71,14 @@ class Twitter:
 
             # Full doc: https://docs.tweepy.org/en/latest/api.html#tweepy.API.media_upload
             response_file = self.client_v1.media_upload(filename=filename)
-            media_ids = [response_file.media_id]
+            media_ids.append(response_file.media_id)
 
             os.remove(filename)
+
+        if filename:
+            # Full doc: https://docs.tweepy.org/en/latest/api.html#tweepy.API.media_upload
+            response_file = self.client_v1.media_upload(filename=f"tmp/{filename}")
+            media_ids.append(response_file.media_id)
 
         response = self.client_v2.create_tweet(
             text=message,

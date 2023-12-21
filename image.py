@@ -1,5 +1,10 @@
-# pip install html2image
+from dotenv import load_dotenv
 from html2image import Html2Image
+from src.twitter import Twitter
+
+
+# load envs from .env file
+load_dotenv()
 
 
 WIDTH = 400
@@ -17,3 +22,7 @@ css = 'body {padding: 10px; margin: auto; width: 380px; background-color: #ddddd
 
 hti.screenshot(html_str=html, css_str=css, save_as="apod.png")
 # hti.screenshot(html_file="apod.html", css_str=css, save_as="apod.png")
+
+twitter_api = Twitter()
+tweet_id = twitter_api.create_tweet(filename="apod.png")
+print("tweet_id", tweet_id)
