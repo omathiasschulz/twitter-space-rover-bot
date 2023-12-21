@@ -7,21 +7,20 @@ from src.twitter import Twitter
 load_dotenv()
 
 
-WIDTH = 400
-HEIGHT = 500
+WIDTH = 600
+HEIGHT = 700
 
 hti = Html2Image(temp_path="tmp", output_path="tmp", size=(WIDTH, HEIGHT))
 
 apod = {
-    "title": "Three Galaxies and a Comet",
-    "explanation": "Distant galaxies abound in this one degree wide field of view toward the southern constellation Grus (The Crane). But the three spiral galaxies at the lower right are quite striking. In fact, all three galaxies are grouped about 70 million light years away and sometimes known as the Grus Triplet. They share the pretty telescopic frame, recorded on December 13, with the comet designated C/2020 V2 ZTF. Now outbound from the inner Solar System and swinging below the ecliptic plane in a hyperbolic orbit, the comet was about 29 light-minutes from our fair planet in this image. And though comet ZTF was brighter when it was closest to the Sun last May and closest to Earth in September of 2023, it still shines in telescopes pointed toward southern night skies, remaining almost as bright as the Grus Triplet galaxies.",
+    "title": "Halos de gelo sobre a Baviera",
+    "explanation": "O que está causando esses arcos incomuns no céu? Cristais de gelo. Ao cruzar um campo de neve fresca perto de Füssen, Baviera, Alemanha, no início deste mês, o fotógrafo percebeu que havia entrado em uma névoa gelada. Para que a água suspensa congele formando uma névoa gelada são necessárias temperaturas bastante baixas e, de fato, a temperatura do ar neste dia foi medida bem abaixo de zero. A névoa gelada refletia a luz do pôr do sol atrás da Igreja de St. Coleman. O resultado foi um dos maiores espetáculos que o fotógrafo já viu. Primeiro, os pontos na imagem em destaque não são estrelas de fundo, mas sim gelo e neve suspensos. A seguir, dois halos de gelo proeminentes são visíveis: o halo de 22 graus e o halo de 46 graus. Vários arcos também são visíveis, incluindo, de cima para baixo, antisolar (subsolar), circunzenital, Parry, tangente e parélico (horizontal). Finalmente, a curva em forma de balão que liga o arco superior ao Sol é a mais rara de todas: é o arco helíaco, criado pela reflexão nas laterais de cristais de gelo de formato hexagonal suspensos numa orientação horizontal.",
 }
 
-html = f'<link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" /><h3>{apod["title"]}</h3><hr /><div>{apod["explanation"]}</div>'
-css = 'body {padding: 10px; margin: auto; width: 380px; background-color: #dddddd; font-family: "Roboto", sans-serif;}'
+html = f'<h3>{apod["title"]}</h3><p>{apod["explanation"]}</p>'
+css = "body { margin: auto; width: 580px; height: 700px; padding: 10px; font-family: 'Lato', sans-serif; font-weight: 300; font-size: 20px; line-height: 1.5; background-image: linear-gradient(to bottom right, #1b4468, #1e4c74); color: white; } h3 { text-transform: uppercase; margin-bottom: 10px; }"
 
 hti.screenshot(html_str=html, css_str=css, save_as="apod.png")
-# hti.screenshot(html_file="apod.html", css_str=css, save_as="apod.png")
 
 twitter_api = Twitter()
 tweet_id = twitter_api.create_tweet(filename="apod.png")
