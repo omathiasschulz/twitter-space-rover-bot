@@ -62,18 +62,18 @@ class Twitter:
         media_ids = []
 
         if file_url:
-            filename = f"tmp/{uuid.uuid4()}.jpg"
+            file_url_filename = f"tmp/{uuid.uuid4()}.jpg"
             request = requests.get(file_url, stream=True, timeout=5)
 
-            with open(filename, "wb") as image:
+            with open(file_url_filename, "wb") as image:
                 for chunk in request:
                     image.write(chunk)
 
             # Full doc: https://docs.tweepy.org/en/latest/api.html#tweepy.API.media_upload
-            response_file = self.client_v1.media_upload(filename=filename)
+            response_file = self.client_v1.media_upload(filename=file_url_filename)
             media_ids.append(response_file.media_id)
 
-            os.remove(filename)
+            os.remove(file_url_filename)
 
         if filename:
             # Full doc: https://docs.tweepy.org/en/latest/api.html#tweepy.API.media_upload
