@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Estilos para a div principal (centralizada) */
+      .container {
+        width: 400px; /* Largura da div principal */
+        height: 400px; /* Altura da div principal */
+        margin: auto; /* Centraliza a div principal */
+        display: flex; /* Usa layout flexível para organizar elementos internos */
+        flex-direction: column; /* Coloca os elementos internos em coluna */
+        justify-content: space-between; /* Distribui os elementos internos igualmente no espaço vertical */
+      }
+
+      /* Estilos para a div no topo */
+      .topo {
+        background-color: #ffcc00; /* Cor de fundo amarelo */
+        text-align: center; /* Centraliza o texto horizontalmente */
+        padding: 10px; /* Adiciona espaço interno */
+      }
+
+      /* Estilos para a div centralizada */
+      .centro {
+        flex-grow: 1; /* Aumenta a altura para preencher o espaço restante na coluna */
+        background-color: #66ccff; /* Cor de fundo azul claro */
+        display: flex; /* Usa layout flexível para organizar conteúdo interno */
+        flex-direction: column; /* Coloca o conteúdo interno em coluna */
+        justify-content: center; /* Centraliza o conteúdo interno verticalmente */
+        align-items: center; /* Centraliza o conteúdo interno horizontalmente */
+        padding: 10px; /* Adiciona espaço interno */
+      }
+
+      /* Estilos para a div no final */
+      .final {
+        background-color: #ff6666; /* Cor de fundo vermelho */
+        text-align: center; /* Centraliza o texto horizontalmente */
+        padding: 10px; /* Adiciona espaço interno */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="topo">Div no Topo</div>
+      <div class="centro">Div Centralizada</div>
+      <div class="final">Div no Final</div>
+    </div>
+  </body>
+</html>
