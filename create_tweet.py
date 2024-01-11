@@ -32,6 +32,8 @@ def __translator(text: str) -> str:
 
 def __bold(text: str) -> str:
     """Transforma o texto informado em negrito para adicionar no tweet
+    Site para base: https://yaytext.com/pt/negrito-it%C3%A1lico/
+    Obs: Caracteres especiais não são mostrados corretamente no Twitter/X mobile
 
     Args:
         text (str): Texto base
@@ -65,7 +67,7 @@ def __main():
         translated_title = __translator(apod_info["title"])
 
         build_message = []
-        build_message.append(f"{__bold(translated_title)} ({apod_info['title']}) 🌌")
+        build_message.append(f"{translated_title} ({apod_info['title']}) 🌌")
 
         formatted_date = datetime.datetime.strptime(
             apod_info["date"], "%Y-%m-%d"
@@ -80,7 +82,7 @@ def __main():
             copyright_to = apod_info["copyright"].replace("\n", "")
             build_message.append(f"Copyright: {copyright_to}")
 
-        build_message.append("#nasa #apod #astronomy #space #science")
+        build_message.append("\n#nasa #apod #astronomy #space #science")
         message = "\n".join(build_message)
 
         twitter_api = Twitter()
@@ -91,9 +93,6 @@ def __main():
 
         # criação do tweet com explicação em português
         translated_explanation = __translator(apod_info["explanation"])
-        translated_explanation = (
-            f"Explicação [🇧🇷 Não oficial]: {translated_explanation}"
-        )
         # translated_explanation_lines = textwrap.wrap(translated_explanation, width=278)
         # for line in translated_explanation_lines:
         #     tweet_id = twitter_api.create_tweet(
@@ -115,8 +114,12 @@ def __main():
         HEIGHT = 700
         hti = Html2Image(temp_path="tmp", output_path="tmp", size=(WIDTH, HEIGHT))
 
-        html = f"<h3>{translated_title}</h3><p>{translated_explanation}</p>"
-        css = "body { margin: auto; width: 580px; height: 700px; padding: 10px; font-family: 'Lato', sans-serif; font-weight: 300; font-size: 20px; line-height: 1.5; background-image: linear-gradient(to bottom right, #1b4468, #1e4c74); color: white; } h3 { text-transform: uppercase; margin-bottom: 10px; }"
+        # html = f"<h3>{translated_title}</h3><p>{translated_explanation}</p>"
+        # css = "body { margin: auto; width: 580px; height: 700px; padding: 10px; font-family: 'Lato', sans-serif; font-weight: 300; font-size: 20px; line-height: 1.5; background-image: linear-gradient(to bottom right, #1b4468, #1e4c74); color: white; } h3 { text-transform: uppercase; margin-bottom: 10px; }"
+
+        html = f'<script src="https://kit.fontawesome.com/4163205221.js" crossorigin="anonymous"></script><link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i&display=swap" rel="stylesheet" /><div class="container"><div class="topo">{translated_title}</div><div class="centro">{translated_explanation}</div><div class="final"><span class="traducao">Tradução não oficial 🇧🇷</span><span class="tag"><i class="fa-brands fa-x-twitter"></i> SpaceRoverBot</span><span class="tag"><i class="fa-regular fa-clock"></i> 05/01/2024</span></div></div>'
+        css = "body {font-family: sans-serif;font-size: 17px;line-height: 1.5;color: #fff;}.container {width: 560px;height: 680px;margin: auto;display: flex; /* layout flexível para organizar elementos internos */flex-direction: column; /* seta os elementos internos em coluna */padding: 6px;background-image: linear-gradient(to bottom right, #136a8a, #267871);border-radius: 5px;border: 2px solid #82c1bb;}.topo {font-size: 25px;font-weight: bold;font-family: 'Open Sans', sans-serif;border-bottom: 1px solid #82c1bb;}.centro {flex-grow: 1; /* aumenta a altura para preencher o espaço restante */display: flex; /* layout flexível para organizar elementos internos */flex-direction: column; /* seta os elementos internos em coluna */justify-content: center; /* centraliza o conteúdo interno verticalmente */}.final {text-align: end;}.traducao {color: #e5e5e5;font-size: 14px;margin-top: 4px;float: left;}.tag {padding: 4px;border-radius: 4px;background-color: rgba(0, 0, 0, 0.6);}.tag:nth-child(2) {margin-right: 6px;}"
+
         hti.screenshot(html_str=html, css_str=css, save_as="apod.png")
         tweet_id = twitter_api.create_tweet(in_reply_to=tweet_id, filename="apod.png")
         logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
