@@ -1,30 +1,25 @@
 <html>
   <head>
     <style>
-      body {
-        font-family: sans-serif;
-        font-size: 17px;
-        line-height: 1.5;
-        color: #fff;
-      }
-
-      .container {
+      .body {
+        margin: auto;
         width: 580px;
         height: 700px;
-        margin: auto;
+        padding: 10px;
+        font-family: sans-serif;
+        font-size: 20px;
+        line-height: 1.5;
+        color: #fff;
+        background-image: linear-gradient(to bottom right, #1b4468, #153653);
         display: flex; /* layout flexível para organizar elementos internos */
         flex-direction: column; /* seta os elementos internos em coluna */
-        padding: 6px;
-        background-image: linear-gradient(to bottom right, #136a8a, #267871);
-        border-radius: 5px;
-        border: 2px solid #82c1bb;
       }
 
       .topo {
         font-size: 25px;
         font-weight: bold;
         font-family: 'Open Sans', sans-serif;
-        border-bottom: 1px solid #82c1bb;
+        border-bottom: 1px solid #8da1b3;
       }
 
       .centro {
@@ -36,19 +31,18 @@
 
       .final {
         text-align: end;
+        font-size: 14px;
+        color: #e5e5e5;
       }
 
       .traducao {
-        color: #e5e5e5;
-        font-size: 14px;
-        margin-top: 4px;
         float: left;
       }
 
       .tag {
-        padding: 4px;
-        border-radius: 4px;
-        background-color: rgba(0, 0, 0, 0.6);
+        padding: 3px;
+        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.5);
       }
 
       .tag:nth-child(2) {
@@ -57,16 +51,16 @@
     </style>
   </head>
   <body>
-    <script
-      src="https://kit.fontawesome.com/4163205221.js"
-      crossorigin="anonymous"
-    ></script>
-    <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i&display=swap"
-      rel="stylesheet"
-    />
+    <div class="body">
+      <script
+        src="https://kit.fontawesome.com/4163205221.js"
+        crossorigin="anonymous"
+      ></script>
+      <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i&display=swap"
+        rel="stylesheet"
+      />
 
-    <div class="container">
       <div class="topo">Halos de gelo sobre a Baviera</div>
 
       <div class="centro">
@@ -89,7 +83,7 @@
       </div>
 
       <div class="final">
-        <span class="traducao">Tradução não oficial 🇧🇷</span>
+        <span class="traducao">🇧🇷 Tradução não oficial</span>
         <span class="tag">
           <i class="fa-brands fa-x-twitter"></i> SpaceRoverBot
         </span>
