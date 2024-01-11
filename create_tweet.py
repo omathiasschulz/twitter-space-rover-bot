@@ -60,7 +60,7 @@ def __main():
         logging.info("Starting script to create a new tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod()
+        apod_info = nasa_api.apod("2024-01-05")
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
@@ -114,17 +114,37 @@ def __main():
         HEIGHT = 700
         hti = Html2Image(temp_path="tmp", output_path="tmp", size=(WIDTH, HEIGHT))
 
-        # html = f"<h3>{translated_title}</h3><p>{translated_explanation}</p>"
-        # css = "body { margin: auto; width: 580px; height: 700px; padding: 10px; font-family: 'Lato', sans-serif; font-weight: 300; font-size: 20px; line-height: 1.5; background-image: linear-gradient(to bottom right, #1b4468, #1e4c74); color: white; } h3 { text-transform: uppercase; margin-bottom: 10px; }"
+        # html = (
+        #     '<script src="https://kit.fontawesome.com/4163205221.js" crossorigin="anonymous">'
+        #     "</script>"
+        #     '<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i&display=swap"'
+        #     ' rel="stylesheet" />'
+        #     f'<div class="topo">{translated_title}</div>'
+        #     f'<div class="centro">{translated_explanation}</div>'
+        #     '<div class="final">'
+        #     '<span class="traducao">🇧🇷 Tradução não oficial</span>'
+        #     '<span class="tag"><i class="fa-brands fa-x-twitter"></i> SpaceRoverBot</span>'
+        #     f'<span class="tag"><i class="fa-regular fa-clock"></i> {formatted_date}</span>'
+        #     "</div>"
+        # )
 
-        html = f'<script src="https://kit.fontawesome.com/4163205221.js" crossorigin="anonymous"></script><link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i&display=swap" rel="stylesheet" /><div class="container"><div class="topo">{translated_title}</div><div class="centro">{translated_explanation}</div><div class="final"><span class="traducao">Tradução não oficial 🇧🇷</span><span class="tag"><i class="fa-brands fa-x-twitter"></i> SpaceRoverBot</span><span class="tag"><i class="fa-regular fa-clock"></i> 05/01/2024</span></div></div>'
-        css = "body {font-family: sans-serif;font-size: 17px;line-height: 1.5;color: #fff;}.container {width: 560px;height: 680px;margin: auto;display: flex; /* layout flexível para organizar elementos internos */flex-direction: column; /* seta os elementos internos em coluna */padding: 6px;background-image: linear-gradient(to bottom right, #136a8a, #267871);border-radius: 5px;border: 2px solid #82c1bb;}.topo {font-size: 25px;font-weight: bold;font-family: 'Open Sans', sans-serif;border-bottom: 1px solid #82c1bb;}.centro {flex-grow: 1; /* aumenta a altura para preencher o espaço restante */display: flex; /* layout flexível para organizar elementos internos */flex-direction: column; /* seta os elementos internos em coluna */justify-content: center; /* centraliza o conteúdo interno verticalmente */}.final {text-align: end;}.traducao {color: #e5e5e5;font-size: 14px;margin-top: 4px;float: left;}.tag {padding: 4px;border-radius: 4px;background-color: rgba(0, 0, 0, 0.6);}.tag:nth-child(2) {margin-right: 6px;}"
+        with open("apod_card.html", encoding="UTF-8") as f:
+            card_html = f.read()
 
-        hti.screenshot(html_str=html, css_str=css, save_as="apod.png")
-        tweet_id = twitter_api.create_tweet(in_reply_to=tweet_id, filename="apod.png")
-        logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+            card_html = card_html.replace("{{title}}", translated_title)
+            card_html = card_html.replace("{{explanation}}", translated_explanation)
+            card_html = card_html.replace("{{date}}", formatted_date)
 
-        logging.info("Tweet posted with success!")
+            hti.screenshot(html_str=card_html, save_as="apod.png")
+            f.close()
+
+            # hti.screenshot(html_str=html, css_file="apod.css", save_as="apod.png")
+            # hti.screenshot(html_file="card_v30.html", save_as="apod.png")
+            tweet_id = twitter_api.create_tweet(
+                in_reply_to=tweet_id, filename="apod.png"
+            )
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+            logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
 
