@@ -91,55 +91,22 @@ def __main():
         )
         logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
-        # criação do tweet com explicação em português
-        translated_explanation = __translator(apod_info["explanation"])
-        # translated_explanation_lines = textwrap.wrap(translated_explanation, width=278)
-        # for line in translated_explanation_lines:
-        #     tweet_id = twitter_api.create_tweet(
-        #         message=f"{line} +", in_reply_to=tweet_id
-        #     )
-        #     logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
-
-        # # criação do tweet com explicação em inglês
-        # explanation = f"Explanation [🇺🇸 Original text]: {apod_info['explanation']}"
-        # explanation_lines = textwrap.wrap(explanation, width=278)
-        # for line in explanation_lines:
-        #     tweet_id = twitter_api.create_tweet(
-        #         message=f"{line} +", in_reply_to=tweet_id
-        #     )
-        #     logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
-
         # criação do tweet com explicação em português - imagem
         WIDTH = 600
         HEIGHT = 700
         hti = Html2Image(temp_path="tmp", output_path="tmp", size=(WIDTH, HEIGHT))
 
-        # html = (
-        #     '<script src="https://kit.fontawesome.com/4163205221.js" crossorigin="anonymous">'
-        #     "</script>"
-        #     '<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i&display=swap"'
-        #     ' rel="stylesheet" />'
-        #     f'<div class="topo">{translated_title}</div>'
-        #     f'<div class="centro">{translated_explanation}</div>'
-        #     '<div class="final">'
-        #     '<span class="traducao">🇧🇷 Tradução não oficial</span>'
-        #     '<span class="tag"><i class="fa-brands fa-x-twitter"></i> SpaceRoverBot</span>'
-        #     f'<span class="tag"><i class="fa-regular fa-clock"></i> {formatted_date}</span>'
-        #     "</div>"
-        # )
-
         with open("apod_card.html", encoding="UTF-8") as f:
             card_html = f.read()
 
             card_html = card_html.replace("{{title}}", translated_title)
+            translated_explanation = __translator(apod_info["explanation"])
             card_html = card_html.replace("{{explanation}}", translated_explanation)
             card_html = card_html.replace("{{date}}", formatted_date)
 
             hti.screenshot(html_str=card_html, save_as="apod.png")
             f.close()
 
-            # hti.screenshot(html_str=html, css_file="apod.css", save_as="apod.png")
-            # hti.screenshot(html_file="card_v30.html", save_as="apod.png")
             tweet_id = twitter_api.create_tweet(
                 in_reply_to=tweet_id, filename="apod.png"
             )
