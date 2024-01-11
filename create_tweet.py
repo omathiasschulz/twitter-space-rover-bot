@@ -84,6 +84,11 @@ def __main():
 
         build_message.append("\n#nasa #apod #astronomy #space #science")
         message = "\n".join(build_message)
+        # diminui o tamanho do tweet caso tenha passado de 280 caracteres
+        if len(message) > 280:
+            message = message.replace("Astronomy Picture of the Day - ", "")
+        if len(message) > 280:
+            message = message.replace("\n#nasa #apod #astronomy #space #science", "")
 
         twitter_api = Twitter()
         tweet_id = twitter_api.create_tweet(
