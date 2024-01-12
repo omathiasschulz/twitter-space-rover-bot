@@ -147,7 +147,7 @@ def __main():
         with open("apod_card.html", encoding="UTF-8") as f:
             card_html = f.read()
 
-            explanation = f"{apod_info['explanation']}"
+            explanation = apod_info["explanation"]
             explanation = explanation.replace("  ", "<br>")
             explanation = explanation.replace(
                 "<br><br>", '<div style="margin: 4px;"></div>'
