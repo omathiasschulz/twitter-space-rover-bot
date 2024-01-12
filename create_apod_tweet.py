@@ -112,7 +112,7 @@ def __main():
         logging.info("Starting script to create the APOD tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod("2024-01-01")
+        apod_info = nasa_api.apod("2024-01-03")
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
@@ -154,9 +154,40 @@ def __main():
             )
             translated_explanation = __translator(explanation)
 
-            card_html = card_html.replace("{{title}}", translated_title)
-            card_html = card_html.replace("{{explanation}}", translated_explanation)
-            card_html = card_html.replace("{{date}}", formatted_date)
+            # translated_title = (
+            #     "Teste com título de duas linhas - Teste com título de duas linhas"
+            # )
+            # translated_explanation = (
+            #     "As galáxias são fascinantes não apenas pelo que é visível, mas também pelo que é invisível."
+            #     " A grande galáxia espiral NGC 1232, capturada em detalhe por um dos Very Large Telescopes, é um bom exemplo.<br>"
+            #     "O visível é dominado por milhões de estrelas brilhantes e poeira escura, apanhados num redemoinho gravitacional de braços espirais que giram em torno do Centro."
+            #     " Aglomerados abertos contendo estrelas azuis brilhantes podem ser vistos espalhados ao longo desses braços espirais,"
+            #     " enquanto faixas escuras de densa poeira interestelar podem ser vistas espalhadas entre eles."
+            #     " Menos visíveis, mas detectáveis, são bilhões de estrelas normais e obscuras e vastas extensões de gás interestelar,"
+            #     " que juntos possuem uma massa tão elevada que dominam a dinâmica do interior da galáxia.<br>As principais teorias indicam que"
+            #     " quantidades ainda maiores de matéria são invisíveis, em uma forma que ainda não conhecemos. Esta matéria escura difusa é postulada,"
+            #     ' em parte, para explicar os movimentos da matéria visível nas regiões externas das galáxias.<div style="margin: 4px;"></div>Palestra'
+            #     " APOD gratuita: 9 de janeiro de 2024 para o Astrônomos Amadores da Associação de Nova York"
+            # )
+            # formatted_date = "01 de Janeiro de 2024"
+
+            # ajusta o tamanho da fonte de acordo com número de palavras
+            default_font_size = "25px"
+            if len(translated_explanation) > 500:
+                default_font_size = "20px"
+            if len(translated_explanation) > 850:
+                default_font_size = "18px"
+            if len(translated_explanation) > 1200:
+                default_font_size = "16px"
+
+            # logging.warning(
+            #     f"Fonte: {default_font_size} | Palavras: {len(translated_explanation)}"
+            # )
+
+            card_html = card_html.replace("var_font_size", default_font_size)
+            card_html = card_html.replace("var_title", translated_title)
+            card_html = card_html.replace("var_explanation", translated_explanation)
+            card_html = card_html.replace("var_date", formatted_date)
 
             hti.screenshot(html_str=card_html, save_as="apod.png")
             f.close()

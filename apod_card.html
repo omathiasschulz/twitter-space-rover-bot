@@ -16,7 +16,7 @@
         height: 680px;
         padding: 10px;
         font-family: sans-serif;
-        font-size: 20px;
+        font-size: var_font_size;
         line-height: 1.4;
         color: #fff;
         background-image: linear-gradient(to bottom right, #1b4468, #153653);
@@ -56,16 +56,16 @@
     </style>
   </head>
   <body>
-    <div class="topo">{{title}}</div>
+    <div class="topo">var_title</div>
 
-    <div class="centro">{{explanation}}</div>
+    <div class="centro">var_explanation</div>
 
     <div class="final">
       <span class="traducao">🇧🇷 Tradução não oficial</span>
       <span class="tag">
         <i class="fa-brands fa-x-twitter"></i> SpaceRoverBot
       </span>
-      <span class="tag"><i class="fa-regular fa-clock"></i> {{date}}</span>
+      <span class="tag"><i class="fa-regular fa-clock"></i> var_date</span>
     </div>
   </body>
 </html>
