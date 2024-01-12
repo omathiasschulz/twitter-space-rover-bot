@@ -2,6 +2,7 @@ import logging
 import datetime
 import locale
 import coloredlogs
+import requests
 from dotenv import load_dotenv
 from deep_translator import GoogleTranslator
 from html2image import Html2Image
@@ -53,6 +54,19 @@ def __bold(text: str) -> str:
     return output
 
 
+def __check_link_is_valid(url: str) -> bool:
+    """Valida se o link informado é válido retornando o status code 200
+
+    Args:
+        url (str): URL para validar
+
+    Returns:
+        bool: Retorna se a URL é válida
+    """
+    response = requests.head(url, timeout=5)
+    return response.status_code == 200
+
+
 def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) -> str:
     """Realiza a construção da mensagem do tweet sobre o APOD do dia
 
@@ -98,7 +112,7 @@ def __main():
         logging.info("Starting script to create the APOD tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod("2024-01-09")
+        apod_info = nasa_api.apod("2024-01-04")
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
@@ -112,7 +126,14 @@ def __main():
         file_url = None
         # se o apod do dia for vídeo, não possui imagem
         if apod_info["media_type"] != "video":
-            file_url = apod_info["hdurl"]
+            # valida se o link HD da imagem está funcionando
+            if apod_info.get("hdurl") and __check_link_is_valid(apod_info["hdurl"]):
+                file_url = apod_info["hdurl"]
+            else:
+                logging.warning(
+                    f"Link HD da imagem não está funcionando... {apod_info['hdurl']}"
+                )
+                file_url = apod_info["url"]
 
         twitter_api = Twitter()
         tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
