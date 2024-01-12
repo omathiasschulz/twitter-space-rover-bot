@@ -112,7 +112,7 @@ def __main():
         logging.info("Starting script to create the APOD tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod("2024-01-04")
+        apod_info = nasa_api.apod("2024-01-01")
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
@@ -147,8 +147,14 @@ def __main():
         with open("apod_card.html", encoding="UTF-8") as f:
             card_html = f.read()
 
+            explanation = f"{apod_info['explanation']}"
+            explanation = explanation.replace("  ", "<br>")
+            explanation = explanation.replace(
+                "<br><br>", '<div style="margin: 4px;"></div>'
+            )
+            translated_explanation = __translator(explanation)
+
             card_html = card_html.replace("{{title}}", translated_title)
-            translated_explanation = __translator(apod_info["explanation"])
             card_html = card_html.replace("{{explanation}}", translated_explanation)
             card_html = card_html.replace("{{date}}", formatted_date)
 
