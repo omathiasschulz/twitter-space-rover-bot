@@ -53,42 +53,58 @@ def __bold(text: str) -> str:
     return output
 
 
+def __apod_message(apod_info: dict, translated_title: str, formatted_date: str):
+    """Realiza a construção da mensagem do tweet sobre o APOD do dia
+
+    Args:
+        apod_info (dict): Informações retornadas da API do APOD
+        translated_title (str): Título do APOD do dia traduzido
+        formatted_date (str): Data do APOD do dia formatado
+
+    Returns:
+        str: Retorna a mensagem
+    """
+    build_message = []
+    build_message.append(f"{translated_title} ({apod_info['title']}) 🌌")
+
+    build_message.append(
+        "\nFoto Astronômica do Dia (Astronomy Picture of the Day - APOD)"
+    )
+    build_message.append(__bold(formatted_date))
+
+    if apod_info.get("copyright"):
+        copyright_to = apod_info["copyright"].replace("\n", "")
+        build_message.append(f"Copyright: {copyright_to}")
+
+    build_message.append("\n#nasa #apod #astronomy #space #science")
+    message = "\n".join(build_message)
+
+    # diminui o tamanho do tweet caso tenha passado de 280 caracteres
+    if len(message) > 280:
+        message = message.replace("Astronomy Picture of the Day - ", "")
+    if len(message) > 280:
+        message = message.replace("\n#nasa #apod #astronomy #space #science", "")
+
+    return message
+
+
 def __main():
-    """Criação de um novo tweet"""
+    """Criação do tweet sobre o APOD"""
 
     try:
-        logging.info("Starting script to create a new tweet...")
+        logging.info("Starting script to create the APOD tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod("2024-01-05")
+        apod_info = nasa_api.apod()
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
         translated_title = __translator(apod_info["title"])
-
-        build_message = []
-        build_message.append(f"{translated_title} ({apod_info['title']}) 🌌")
-
         formatted_date = datetime.datetime.strptime(
             apod_info["date"], "%Y-%m-%d"
         ).strftime("%d de %B de %Y")
 
-        build_message.append(
-            "\nFoto Astronômica do Dia (Astronomy Picture of the Day - APOD)"
-        )
-        build_message.append(__bold(formatted_date))
-
-        if apod_info.get("copyright"):
-            copyright_to = apod_info["copyright"].replace("\n", "")
-            build_message.append(f"Copyright: {copyright_to}")
-
-        build_message.append("\n#nasa #apod #astronomy #space #science")
-        message = "\n".join(build_message)
-        # diminui o tamanho do tweet caso tenha passado de 280 caracteres
-        if len(message) > 280:
-            message = message.replace("Astronomy Picture of the Day - ", "")
-        if len(message) > 280:
-            message = message.replace("\n#nasa #apod #astronomy #space #science", "")
+        message = __apod_message(apod_info, translated_title, formatted_date)
 
         twitter_api = Twitter()
         tweet_id = twitter_api.create_tweet(
@@ -96,10 +112,10 @@ def __main():
         )
         logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
-        # criação do tweet com explicação em português - imagem
-        WIDTH = 600
-        HEIGHT = 700
-        hti = Html2Image(temp_path="tmp", output_path="tmp", size=(WIDTH, HEIGHT))
+        # criação do tweet com a imagem da explicação em português
+        width = 600
+        height = 700
+        hti = Html2Image(temp_path="tmp", output_path="tmp", size=(width, height))
 
         with open("apod_card.html", encoding="UTF-8") as f:
             card_html = f.read()
