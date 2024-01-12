@@ -83,7 +83,7 @@ class Twitter:
         response = self.client_v2.create_tweet(
             text=message,
             in_reply_to_tweet_id=in_reply_to,
-            media_ids=media_ids,
+            media_ids=media_ids if media_ids else None,
         )
 
         return response.data["id"]

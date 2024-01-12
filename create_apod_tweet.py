@@ -53,7 +53,7 @@ def __bold(text: str) -> str:
     return output
 
 
-def __apod_message(apod_info: dict, translated_title: str, formatted_date: str):
+def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) -> str:
     """Realiza a construção da mensagem do tweet sobre o APOD do dia
 
     Args:
@@ -66,6 +66,9 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str):
     """
     build_message = []
     build_message.append(f"{translated_title} ({apod_info['title']}) 🌌")
+
+    if apod_info["media_type"] == "video":
+        build_message.append(f"\nAssista ao vídeo: {apod_info['url']}")
 
     build_message.append(
         "\nFoto Astronômica do Dia (Astronomy Picture of the Day - APOD)"
@@ -95,7 +98,7 @@ def __main():
         logging.info("Starting script to create the APOD tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod()
+        apod_info = nasa_api.apod("2024-01-09")
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
@@ -106,10 +109,13 @@ def __main():
 
         message = __apod_message(apod_info, translated_title, formatted_date)
 
+        file_url = None
+        # se o apod do dia for vídeo, não possui imagem
+        if apod_info["media_type"] != "video":
+            file_url = apod_info["hdurl"]
+
         twitter_api = Twitter()
-        tweet_id = twitter_api.create_tweet(
-            message=message, file_url=apod_info["hdurl"]
-        )
+        tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
         logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
