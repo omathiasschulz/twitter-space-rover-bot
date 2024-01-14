@@ -154,9 +154,7 @@ def __main():
             )
             translated_explanation = __translator(explanation)
 
-            # translated_title = (
-            #     "Teste com título de duas linhas - Teste com título de duas linhas"
-            # )
+            # translated_title = "Teste 01 Teste 02 Teste 03"
             # translated_explanation = (
             #     "As galáxias são fascinantes não apenas pelo que é visível, mas também pelo que é invisível."
             #     " A grande galáxia espiral NGC 1232, capturada em detalhe por um dos Very Large Telescopes, é um bom exemplo.<br>"
@@ -164,25 +162,48 @@ def __main():
             #     " Aglomerados abertos contendo estrelas azuis brilhantes podem ser vistos espalhados ao longo desses braços espirais,"
             #     " enquanto faixas escuras de densa poeira interestelar podem ser vistas espalhadas entre eles."
             #     " Menos visíveis, mas detectáveis, são bilhões de estrelas normais e obscuras e vastas extensões de gás interestelar,"
-            #     " que juntos possuem uma massa tão elevada que dominam a dinâmica do interior da galáxia.<br>As principais teorias indicam que"
-            #     " quantidades ainda maiores de matéria são invisíveis, em uma forma que ainda não conhecemos. Esta matéria escura difusa é postulada,"
-            #     ' em parte, para explicar os movimentos da matéria visível nas regiões externas das galáxias.<div style="margin: 4px;"></div>Palestra'
-            #     " APOD gratuita: 9 de janeiro de 2024 para o Astrônomos Amadores da Associação de Nova York"
+            #     " que juntos possuem uma massa tão elevada que dominam"
+            #     " a dinâmica do interior da galáxia.<br>As principais teorias indicam que"
+            #     " quantidades ainda maiores de matéria são invisíveis, em"
+            #     " uma forma que ainda não conhecemos. Esta matéria escura difusa é postulada,"
+            #     " em parte, para explicar os movimentos da matéria visível nas regiões"
+            #     ' externas das galáxias.<div style="margin: 4px;"></div>Palestra'
+            #     " APOD gratuita: 9 de janeiro de 2024 para"
+            #     " o Astrônomos Amadores da Associação de Nova York"
+            #     " o Astrônomos Amadores da Associação de Nova York"
+            #     " o Astrônomos Amadores da Associação de Nova York"
+            #     " o Astrônomos Amadores da Associação de Nova York"
+            #     " o Astrônomos Amadores da Associação de Nova York"
             # )
             # formatted_date = "01 de Janeiro de 2024"
 
-            # ajusta o tamanho da fonte do título
+            # ajusta o tamanho da fonte do título de acordo com número de palavras
             default_head_font_size = "38px"
+            if len(translated_title) > 33:
+                default_head_font_size = "30px"
+            if len(translated_title) > 42:
+                default_head_font_size = "25px"
 
             # ajusta o tamanho da fonte de acordo com número de palavras
-            default_font_size = "28px"
-            # default_font_size = "25px"
-            # if len(translated_explanation) > 500:
-            #     default_font_size = "20px"
-            # if len(translated_explanation) > 850:
-            #     default_font_size = "18px"
-            # if len(translated_explanation) > 1200:
-            #     default_font_size = "16px"
+            default_font_size = "40px"
+            if len(translated_explanation) > 600:
+                default_font_size = "36px"
+            if len(translated_explanation) > 800:
+                default_font_size = "34px"
+            if len(translated_explanation) > 900:
+                default_font_size = "32px"
+            if len(translated_explanation) > 1000:
+                default_font_size = "30px"
+            if len(translated_explanation) > 1100:
+                default_font_size = "29px"
+            if len(translated_explanation) > 1200:
+                default_font_size = "28px"
+            if len(translated_explanation) > 1300:
+                default_font_size = "27px"
+            if len(translated_explanation) > 1400:
+                default_font_size = "26px"
+            if len(translated_explanation) > 1500:
+                default_font_size = "20px"
 
             # logging.warning(
             #     f"Fonte: {default_font_size} | Palavras: {len(translated_explanation)}"
