@@ -140,8 +140,8 @@ def __main():
         logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
-        width = 600
-        height = 700
+        width = 950
+        height = 1000
         hti = Html2Image(temp_path="tmp", output_path="tmp", size=(width, height))
 
         with open("apod_card.html", encoding="UTF-8") as f:
@@ -171,19 +171,24 @@ def __main():
             # )
             # formatted_date = "01 de Janeiro de 2024"
 
+            # ajusta o tamanho da fonte do título
+            default_head_font_size = "38px"
+
             # ajusta o tamanho da fonte de acordo com número de palavras
-            default_font_size = "25px"
-            if len(translated_explanation) > 500:
-                default_font_size = "20px"
-            if len(translated_explanation) > 850:
-                default_font_size = "18px"
-            if len(translated_explanation) > 1200:
-                default_font_size = "16px"
+            default_font_size = "28px"
+            # default_font_size = "25px"
+            # if len(translated_explanation) > 500:
+            #     default_font_size = "20px"
+            # if len(translated_explanation) > 850:
+            #     default_font_size = "18px"
+            # if len(translated_explanation) > 1200:
+            #     default_font_size = "16px"
 
             # logging.warning(
             #     f"Fonte: {default_font_size} | Palavras: {len(translated_explanation)}"
             # )
 
+            card_html = card_html.replace("var_head_font_size", default_head_font_size)
             card_html = card_html.replace("var_font_size", default_font_size)
             card_html = card_html.replace("var_title", translated_title)
             card_html = card_html.replace("var_explanation", translated_explanation)
