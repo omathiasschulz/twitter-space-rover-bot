@@ -112,7 +112,7 @@ def __main():
         logging.info("Starting script to create the APOD tweet...")
 
         nasa_api = Nasa()
-        apod_info = nasa_api.apod("2024-01-03")
+        apod_info = nasa_api.apod()
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal

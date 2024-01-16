@@ -1,0 +1,8 @@
+version: '3'
+services:
+  twitter-bot:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/services/schulz/twitter-bot
