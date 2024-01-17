@@ -147,6 +147,7 @@ def __main():
             output_path="tmp",
             size=(width, height),
             custom_flags=["--no-sandbox", "--disable-gpu"],
+            disable_logging=True,
         )
 
         with open("apod_card.html", encoding="UTF-8") as f:
