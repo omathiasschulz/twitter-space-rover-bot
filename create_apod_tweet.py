@@ -211,9 +211,12 @@ def __main():
             if len(translated_explanation) > 1500:
                 default_font_size = "20px"
 
-            # logging.warning(
-            #     f"Fonte: {default_font_size} | Palavras: {len(translated_explanation)}"
-            # )
+            logging.warning(
+                f"Head: {default_head_font_size} | {len(translated_title)} words"
+            )
+            logging.warning(
+                f"Body: {default_font_size} | {len(translated_explanation)} words"
+            )
 
             card_html = card_html.replace("var_head_font_size", default_head_font_size)
             card_html = card_html.replace("var_font_size", default_font_size)
