@@ -13,7 +13,7 @@ from src.twitter import Twitter
 load_dotenv()
 
 # add colored logs to script
-coloredlogs.install()
+coloredlogs.install(isatty=True)
 
 # brazilian format date
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
@@ -142,7 +142,12 @@ def __main():
         # criação do tweet com a imagem da explicação em português
         width = 950
         height = 1000
-        hti = Html2Image(temp_path="tmp", output_path="tmp", size=(width, height))
+        hti = Html2Image(
+            temp_path="tmp",
+            output_path="tmp",
+            size=(width, height),
+            custom_flags=["--no-sandbox", "--disable-gpu"],
+        )
 
         with open("apod_card.html", encoding="UTF-8") as f:
             card_html = f.read()
