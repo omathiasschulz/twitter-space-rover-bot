@@ -1,6 +1,6 @@
 import logging
-import datetime
 import locale
+from datetime import datetime
 import coloredlogs
 import requests
 from dotenv import load_dotenv
@@ -8,6 +8,7 @@ from deep_translator import GoogleTranslator
 from html2image import Html2Image
 from src.nasa import Nasa
 from src.twitter import Twitter
+
 
 # load envs from .env file
 load_dotenv()
@@ -52,6 +53,34 @@ def __bold(text: str) -> str:
         else:
             output += character
     return output
+
+
+def __describe_date(base_date: str) -> str:
+    """Formata a data e retorna no padrão: DD de FULL_MM de YYYY
+
+    Args:
+        base_date (str): Data para formatar no padrão YYYY-MM-DD
+
+    Returns:
+        str: Retorna a data formatada
+    """
+    full_months = {
+        "01": "Janeiro",
+        "02": "Fevereiro",
+        "03": "Março",
+        "04": "Abril",
+        "05": "Maio",
+        "06": "Junho",
+        "07": "Julho",
+        "08": "Agosto",
+        "09": "Setembro",
+        "10": "Outubro",
+        "11": "Novembro",
+        "12": "Dezembro",
+    }
+    date = datetime.strptime(base_date, "%Y-%m-%d")
+    month = date.strftime("%m")
+    return date.strftime(f"%d de {full_months[month]} de %Y")
 
 
 def __check_link_is_valid(url: str) -> bool:
@@ -117,9 +146,8 @@ def __main():
 
         # criação do tweet principal
         translated_title = __translator(apod_info["title"])
-        formatted_date = datetime.datetime.strptime(
-            apod_info["date"], "%Y-%m-%d"
-        ).strftime("%d de %B de %Y")
+
+        formatted_date = __describe_date(apod_info["date"])
 
         message = __apod_message(apod_info, translated_title, formatted_date)
 
@@ -159,29 +187,6 @@ def __main():
                 "<br><br>", '<div style="margin: 4px;"></div>'
             )
             translated_explanation = __translator(explanation)
-
-            # translated_title = "Teste 01 Teste 02 Teste 03"
-            # translated_explanation = (
-            #     "As galáxias são fascinantes não apenas pelo que é visível, mas também pelo que é invisível."
-            #     " A grande galáxia espiral NGC 1232, capturada em detalhe por um dos Very Large Telescopes, é um bom exemplo.<br>"
-            #     "O visível é dominado por milhões de estrelas brilhantes e poeira escura, apanhados num redemoinho gravitacional de braços espirais que giram em torno do Centro."
-            #     " Aglomerados abertos contendo estrelas azuis brilhantes podem ser vistos espalhados ao longo desses braços espirais,"
-            #     " enquanto faixas escuras de densa poeira interestelar podem ser vistas espalhadas entre eles."
-            #     " Menos visíveis, mas detectáveis, são bilhões de estrelas normais e obscuras e vastas extensões de gás interestelar,"
-            #     " que juntos possuem uma massa tão elevada que dominam"
-            #     " a dinâmica do interior da galáxia.<br>As principais teorias indicam que"
-            #     " quantidades ainda maiores de matéria são invisíveis, em"
-            #     " uma forma que ainda não conhecemos. Esta matéria escura difusa é postulada,"
-            #     " em parte, para explicar os movimentos da matéria visível nas regiões"
-            #     ' externas das galáxias.<div style="margin: 4px;"></div>Palestra'
-            #     " APOD gratuita: 9 de janeiro de 2024 para"
-            #     " o Astrônomos Amadores da Associação de Nova York"
-            #     " o Astrônomos Amadores da Associação de Nova York"
-            #     " o Astrônomos Amadores da Associação de Nova York"
-            #     " o Astrônomos Amadores da Associação de Nova York"
-            #     " o Astrônomos Amadores da Associação de Nova York"
-            # )
-            # formatted_date = "01 de Janeiro de 2024"
 
             # ajusta o tamanho da fonte do título de acordo com número de palavras
             default_head_font_size = "38px"
