@@ -136,10 +136,9 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
 
 def __main():
     """Criação do tweet sobre o APOD"""
+    logging.warning(f"##### APOD SCRIPT - STARTED [{datetime.now()}] #####")
 
     try:
-        logging.info("Starting script to create the APOD tweet...")
-
         nasa_api = Nasa()
         apod_info = nasa_api.apod()
         logging.info(f"APOD > {apod_info}")
@@ -216,10 +215,10 @@ def __main():
             if len(translated_explanation) > 1500:
                 default_font_size = "20px"
 
-            logging.warning(
+            logging.info(
                 f"Head: {default_head_font_size} | {len(translated_title)} words"
             )
-            logging.warning(
+            logging.info(
                 f"Body: {default_font_size} | {len(translated_explanation)} words"
             )
 
@@ -239,6 +238,7 @@ def __main():
             logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
+    logging.warning(f"##### APOD SCRIPT - FINISHED [{datetime.now()}] #####")
 
 
 if __name__ == "__main__":
