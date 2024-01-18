@@ -2,9 +2,13 @@ FROM python:3.10.12-alpine
 LABEL maintainer="Mathias Artur Schulz <mathias@schulz.net.br>"
 
 ENV MAIN_DIR="/twitter-bot"
-ENV LOG_FILE="${MAIN_DIR}/crontab.log"
+ENV CRON_DIR="/cron"
 # desabilita o buffering da saída do Python para garantir uma exibição imediata e sem atrasos
 ENV PYTHONUNBUFFERED 1
+
+# cria pasta separada e arquivo para salvar os logs
+RUN mkdir ${CRON_DIR}
+RUN touch ${CRON_DIR}/crontab.log
 
 WORKDIR ${MAIN_DIR}
 
@@ -19,13 +23,10 @@ ENV TZ=America/Sao_Paulo
 RUN apk add --no-cache chromium
 
 # cria o arquivo crontab e configura uma cronjob para executar um script python e redireciona a saída para o arquivo de logs
-RUN echo "0 6 * * * cd ${MAIN_DIR} && python create_apod_tweet.py >> ${LOG_FILE} 2>&1" > ${MAIN_DIR}/crontab
-
-# cria o arquivo para salvar os logs
-RUN touch ${LOG_FILE}
+RUN echo "0 6 * * * cd ${MAIN_DIR} && python create_apod_tweet.py >> ${CRON_DIR}/crontab.log 2>&1" > ${CRON_DIR}/crontab
 
 # lê o arquivo crontab e instala as configurações de cron
-RUN crontab ${MAIN_DIR}/crontab
+RUN crontab ${CRON_DIR}/crontab
 
 # inicia o daemon cron e acompanha atualizações no arquivo de logs
-CMD printf "Success\nWaiting for cronjobs...\n" && crond && tail -f ${LOG_FILE}
+CMD printf "Success\nWaiting for cronjobs...\n" && crond && tail -f ${CRON_DIR}/crontab.log
