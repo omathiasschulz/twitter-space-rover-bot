@@ -136,7 +136,8 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
 
 def __main():
     """Criação do tweet sobre o APOD"""
-    logging.warning(f"##### APOD SCRIPT - STARTED [{datetime.now()}] #####")
+    start = datetime.now()
+    logging.warning(f"##### APOD SCRIPT - STARTED [{start}] #####")
 
     try:
         nasa_api = Nasa()
@@ -238,7 +239,9 @@ def __main():
             logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
-    logging.warning(f"##### APOD SCRIPT - FINISHED [{datetime.now()}] #####")
+    end = datetime.now()
+    logging.info(f"Runtime: {(end - start).total_seconds()} seconds")
+    logging.warning(f"##### APOD SCRIPT - FINISHED [{end}] #####")
 
 
 if __name__ == "__main__":
