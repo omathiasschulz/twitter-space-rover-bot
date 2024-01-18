@@ -5,4 +5,4 @@ services:
       context: .
       dockerfile: ./Dockerfile.prod
     volumes:
-      - .:/services/schulz/twitter-bot
+      - .:/twitter-bot
