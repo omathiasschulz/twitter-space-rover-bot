@@ -106,11 +106,11 @@ Exemplo de request GET para consulta do APOD (Astronomy Picture of the Day) dos 
 
 ## Ambiente de Produção
 
-A aplicação está rodando em produção utilizando uma máquina **t2.micro** da **EC2** (Amazon Elastic Compute Cloud) **AWS** (Amazon Web Services), utilizando como base os arquivos `docker-compose.prod.yml` e `Dockerfile.prod`.
+A aplicação está rodando em produção com uma máquina **t2.micro** da **EC2** (Amazon Elastic Compute Cloud) **AWS** (Amazon Web Services), utilizando como base os arquivos `docker-compose.prod.yml` e `Dockerfile.prod`.
 
 O principal motivo para escolha do serviço EC2 foi para aprender a utilizar uma poderosa ferramenta disponibilizada pela AWS.
 
-No Dockerfile foi configurado uma **Cron job** que será executada todo dia às 6 horas da manhã.
+No Dockerfile foi configurado uma **Cron job** para execução do script `create_apod_tweet.py`, no qual será executada todo dia às 6 horas da manhã e, com isso, será criado dois posts no Twitter, um post da imagem do dia e outro post com a explicação da imagem.
 
 ### Cron jobs
 
