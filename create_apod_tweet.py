@@ -129,11 +129,15 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     build_message.append("\n#nasa #apod #astronomy #space #science")
     message = "\n".join(build_message)
 
-    # diminui o tamanho do tweet caso tenha passado de 280 caracteres
-    if len(message) > 280:
+    # diminui o tamanho do tweet
+    # tamanho máximo para mensagem no twitter = 280 caracteres
+    # negrito e ícones usam 2 caracteres de espaço no twitter, totalizando +20 caracteres
+    if len(message) > 260:
         message = message.replace("Astronomy Picture of the Day - ", "")
-    if len(message) > 280:
+    if len(message) > 260:
         message = message.replace("\n#nasa #apod #astronomy #space #science", "")
+    if len(message) > 260:
+        message = message[:260]
 
     return message
 
