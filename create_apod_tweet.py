@@ -1,3 +1,4 @@
+import os
 import logging
 import locale
 from datetime import datetime
@@ -18,6 +19,9 @@ coloredlogs.install(isatty=True)
 
 # brazilian format date
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
+
+# is debug
+is_debug = os.getenv("DEBUG") != "0"
 
 
 def __translator(text: str) -> str:
@@ -138,6 +142,8 @@ def __main():
     """Criação do tweet sobre o APOD"""
     start = datetime.now()
     logging.warning(f"##### APOD SCRIPT - STARTED [{start}] #####")
+    if is_debug:
+        logging.warning("[DEVELOPMENT MODE]")
 
     try:
         nasa_api = Nasa()
@@ -163,9 +169,10 @@ def __main():
                 )
                 file_url = apod_info["url"]
 
-        twitter_api = Twitter()
-        tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
-        logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+        if not is_debug:
+            twitter_api = Twitter()
+            tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
         width = 950
@@ -232,10 +239,13 @@ def __main():
             hti.screenshot(html_str=card_html, save_as="apod.png")
             f.close()
 
-            tweet_id = twitter_api.create_tweet(
-                in_reply_to=tweet_id, filename="apod.png"
-            )
-            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+            if not is_debug:
+                tweet_id = twitter_api.create_tweet(
+                    in_reply_to=tweet_id, filename="apod.png"
+                )
+                logging.warning(
+                    f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
+                )
             logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
