@@ -1,3 +1,4 @@
+import os
 import logging
 import locale
 from datetime import datetime
@@ -18,6 +19,9 @@ coloredlogs.install(isatty=True)
 
 # brazilian format date
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
+
+# is debug
+is_debug = os.getenv("DEBUG") != "0"
 
 
 def __translator(text: str) -> str:
@@ -118,18 +122,18 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     )
     build_message.append(__bold(formatted_date))
 
-    if apod_info.get("copyright"):
-        copyright_to = apod_info["copyright"].replace("\n", "")
-        build_message.append(f"Copyright: {copyright_to}")
-
     build_message.append("\n#nasa #apod #astronomy #space #science")
     message = "\n".join(build_message)
 
-    # diminui o tamanho do tweet caso tenha passado de 280 caracteres
-    if len(message) > 280:
+    # diminui o tamanho do tweet
+    # tamanho máximo para mensagem no twitter = 280 caracteres
+    # negrito e ícones usam 2 caracteres de espaço no twitter, totalizando +20 caracteres
+    if len(message) > 260:
         message = message.replace("Astronomy Picture of the Day - ", "")
-    if len(message) > 280:
+    if len(message) > 260:
         message = message.replace("\n#nasa #apod #astronomy #space #science", "")
+    if len(message) > 260:
+        message = message[:260]
 
     return message
 
@@ -138,6 +142,8 @@ def __main():
     """Criação do tweet sobre o APOD"""
     start = datetime.now()
     logging.warning(f"##### APOD SCRIPT - STARTED [{start}] #####")
+    if is_debug:
+        logging.warning("[DEVELOPMENT MODE]")
 
     try:
         nasa_api = Nasa()
@@ -163,9 +169,10 @@ def __main():
                 )
                 file_url = apod_info["url"]
 
-        twitter_api = Twitter()
-        tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
-        logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+        if not is_debug:
+            twitter_api = Twitter()
+            tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
         width = 950
@@ -232,10 +239,21 @@ def __main():
             hti.screenshot(html_str=card_html, save_as="apod.png")
             f.close()
 
-            tweet_id = twitter_api.create_tweet(
-                in_reply_to=tweet_id, filename="apod.png"
-            )
-            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+            apod_explanation_message = ""
+            if apod_info.get("copyright"):
+                copyright_to = apod_info["copyright"].replace("\n", "")
+                apod_explanation_message = f"Copyright: {copyright_to}"
+            apod_explanation_message += "\n\nExplicação detalhada ⤵️"
+
+            if not is_debug:
+                tweet_id = twitter_api.create_tweet(
+                    in_reply_to=tweet_id,
+                    message=apod_explanation_message,
+                    filename="apod.png",
+                )
+                logging.warning(
+                    f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
+                )
             logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
