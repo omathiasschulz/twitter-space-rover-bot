@@ -122,10 +122,6 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     )
     build_message.append(__bold(formatted_date))
 
-    if apod_info.get("copyright"):
-        copyright_to = apod_info["copyright"].replace("\n", "")
-        build_message.append(f"Copyright: {copyright_to}")
-
     build_message.append("\n#nasa #apod #astronomy #space #science")
     message = "\n".join(build_message)
 
@@ -243,9 +239,17 @@ def __main():
             hti.screenshot(html_str=card_html, save_as="apod.png")
             f.close()
 
+            apod_explanation_message = ""
+            if apod_info.get("copyright"):
+                copyright_to = apod_info["copyright"].replace("\n", "")
+                apod_explanation_message = f"Copyright: {copyright_to}"
+            apod_explanation_message += "\n\nExplicação detalhada ⤵️"
+
             if not is_debug:
                 tweet_id = twitter_api.create_tweet(
-                    in_reply_to=tweet_id, filename="apod.png"
+                    in_reply_to=tweet_id,
+                    message=apod_explanation_message,
+                    filename="apod.png",
                 )
                 logging.warning(
                     f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
