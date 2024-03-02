@@ -6,8 +6,8 @@ import coloredlogs
 import requests
 from dotenv import load_dotenv
 from html2image import Html2Image
-from src.nasa import Nasa
-from src.twitter import Twitter
+from src.api.nasa import Nasa
+from src.api.twitter import Twitter
 from src.utils.text import text_bold, text_translator
 from src.utils.date import date_describe
 
