@@ -33,4 +33,8 @@ def text_bold(text: str) -> str:
             output += bold_chars[chars.index(character)]
         else:
             output += character
+
+    # some special characters to update
+    output = output.replace("ç", "𝗰̧").replace("Ç", "𝗖̧")
+
     return output

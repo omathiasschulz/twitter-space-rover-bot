@@ -107,7 +107,10 @@ def __main():
                 )
                 file_url = apod_info["url"]
 
-        if not is_debug:
+        if is_debug:
+            logging.info("### Message")
+            logging.info(message)
+        else:
             twitter_api = Twitter()
             tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
             logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
@@ -183,7 +186,10 @@ def __main():
                 apod_explanation_message = f"Copyright: {copyright_to}"
             apod_explanation_message += "\n\nExplicação detalhada ⤵️"
 
-            if not is_debug:
+            if is_debug:
+                logging.info("### Apod Explanation Message")
+                logging.info(apod_explanation_message)
+            else:
                 tweet_id = twitter_api.create_tweet(
                     in_reply_to=tweet_id,
                     message=apod_explanation_message,
@@ -192,6 +198,7 @@ def __main():
                 logging.warning(
                     f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
                 )
+
             logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
