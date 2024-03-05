@@ -5,10 +5,11 @@ from datetime import datetime
 import coloredlogs
 import requests
 from dotenv import load_dotenv
-from deep_translator import GoogleTranslator
 from html2image import Html2Image
-from src.nasa import Nasa
-from src.twitter import Twitter
+from src.api.nasa import Nasa
+from src.api.twitter import Twitter
+from src.utils.text import text_bold, text_translator
+from src.utils.date import date_describe
 
 
 # load envs from .env file
@@ -22,69 +23,6 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
 # is debug
 is_debug = os.getenv("DEBUG") != "0"
-
-
-def __translator(text: str) -> str:
-    """Traduz o texto informado em inglês para português
-
-    Args:
-        text (str): Texto em inglês
-
-    Returns:
-        str: Texto em português
-    """
-    return GoogleTranslator(source="en", target="pt").translate(text)
-
-
-def __bold(text: str) -> str:
-    """Transforma o texto informado em negrito para adicionar no tweet
-    Site para base: https://yaytext.com/pt/negrito-it%C3%A1lico/
-    Obs: Caracteres especiais não são mostrados corretamente no Twitter/X mobile
-
-    Args:
-        text (str): Texto base
-
-    Returns:
-        str: Texto em negrito
-    """
-    output = ""
-    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    bold_chars = "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵"
-
-    for character in text:
-        if character in chars:
-            output += bold_chars[chars.index(character)]
-        else:
-            output += character
-    return output
-
-
-def __describe_date(base_date: str) -> str:
-    """Formata a data e retorna no padrão: DD de FULL_MM de YYYY
-
-    Args:
-        base_date (str): Data para formatar no padrão YYYY-MM-DD
-
-    Returns:
-        str: Retorna a data formatada
-    """
-    full_months = {
-        "01": "Janeiro",
-        "02": "Fevereiro",
-        "03": "Março",
-        "04": "Abril",
-        "05": "Maio",
-        "06": "Junho",
-        "07": "Julho",
-        "08": "Agosto",
-        "09": "Setembro",
-        "10": "Outubro",
-        "11": "Novembro",
-        "12": "Dezembro",
-    }
-    date = datetime.strptime(base_date, "%Y-%m-%d")
-    month = date.strftime("%m")
-    return date.strftime(f"%d de {full_months[month]} de %Y")
 
 
 def __check_link_is_valid(url: str) -> bool:
@@ -120,7 +58,7 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     build_message.append(
         "\nFoto Astronômica do Dia (Astronomy Picture of the Day - APOD)"
     )
-    build_message.append(__bold(formatted_date))
+    build_message.append(text_bold(formatted_date))
 
     build_message.append("\n#nasa #apod #astronomy #space #science")
     message = "\n".join(build_message)
@@ -151,9 +89,9 @@ def __main():
         logging.info(f"APOD > {apod_info}")
 
         # criação do tweet principal
-        translated_title = __translator(apod_info["title"])
+        translated_title = text_translator(apod_info["title"])
 
-        formatted_date = __describe_date(apod_info["date"])
+        formatted_date = date_describe(apod_info["date"])
 
         message = __apod_message(apod_info, translated_title, formatted_date)
 
@@ -169,7 +107,10 @@ def __main():
                 )
                 file_url = apod_info["url"]
 
-        if not is_debug:
+        if is_debug:
+            logging.info("### Message")
+            logging.info(message)
+        else:
             twitter_api = Twitter()
             tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
             logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
@@ -193,7 +134,7 @@ def __main():
             explanation = explanation.replace(
                 "<br><br>", '<div style="margin: 4px;"></div>'
             )
-            translated_explanation = __translator(explanation)
+            translated_explanation = text_translator(explanation)
 
             # ajusta o tamanho da fonte do título de acordo com número de palavras
             default_head_font_size = "38px"
@@ -245,7 +186,10 @@ def __main():
                 apod_explanation_message = f"Copyright: {copyright_to}"
             apod_explanation_message += "\n\nExplicação detalhada ⤵️"
 
-            if not is_debug:
+            if is_debug:
+                logging.info("### Apod Explanation Message")
+                logging.info(apod_explanation_message)
+            else:
                 tweet_id = twitter_api.create_tweet(
                     in_reply_to=tweet_id,
                     message=apod_explanation_message,
@@ -254,9 +198,11 @@ def __main():
                 logging.warning(
                     f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
                 )
+
             logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
+
     end = datetime.now()
     logging.info(f"Runtime: {(end - start).total_seconds()} seconds")
     logging.warning(f"##### APOD SCRIPT - FINISHED [{end}] #####")
