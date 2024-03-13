@@ -14,8 +14,9 @@ RUN pip install -r requirements.txt
 RUN apk add --no-cache tzdata
 ENV TZ=America/Sao_Paulo
 
-# instala o chromium para funcionar a lib python html2image
+# instala o chromium para funcionar a geração de imagem
 RUN apk add --no-cache chromium
+RUN apk add --no-cache chromium-chromedriver
 
 # roda o script python ao iniciar o container
 CMD python create_apod_tweet.py
