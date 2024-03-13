@@ -126,48 +126,15 @@ def __main():
             )
             translated_explanation = text_translator(explanation)
 
-            # ajusta o tamanho da fonte do título de acordo com número de palavras
-            default_head_font_size = "38px"
-            if len(translated_title) > 33:
-                default_head_font_size = "30px"
-            if len(translated_title) > 42:
-                default_head_font_size = "25px"
-
-            # ajusta o tamanho da fonte de acordo com número de palavras
-            default_font_size = "40px"
-            if len(translated_explanation) > 600:
-                default_font_size = "36px"
-            if len(translated_explanation) > 800:
-                default_font_size = "34px"
-            if len(translated_explanation) > 900:
-                default_font_size = "32px"
-            if len(translated_explanation) > 1000:
-                default_font_size = "30px"
-            if len(translated_explanation) > 1100:
-                default_font_size = "29px"
-            if len(translated_explanation) > 1200:
-                default_font_size = "28px"
-            if len(translated_explanation) > 1300:
-                default_font_size = "27px"
-            if len(translated_explanation) > 1400:
-                default_font_size = "26px"
-            if len(translated_explanation) > 1500:
-                default_font_size = "20px"
-
-            logging.info(
-                f"Head: {default_head_font_size} | {len(translated_title)} words"
-            )
-            logging.info(
-                f"Body: {default_font_size} | {len(translated_explanation)} words"
-            )
-
-            card_html = card_html.replace("var_head_font_size", default_head_font_size)
-            card_html = card_html.replace("var_font_size", default_font_size)
             card_html = card_html.replace("var_title", translated_title)
             card_html = card_html.replace("var_explanation", translated_explanation)
             card_html = card_html.replace("var_date", formatted_date)
 
-            html_to_image(card_html, "apod")
+            with open("tmp/apod.html", "w", encoding="utf-8") as html_file:
+                html_file.write(card_html)
+                html_file.close()
+
+            html_to_image("apod.html", "apod")
             file.close()
 
             apod_explanation_message = ""

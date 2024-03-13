@@ -1,27 +1,31 @@
 import time
+from pathlib import Path
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chromium.options import ChromiumOptions
 
 
-def html_to_image(html_content: str, save_as: str):
+def html_to_image(html_filename: str, save_as: str):
     """Salva o HTML informado no formato imagem PNG
 
     Args:
-        html_content (str): HTML para converter como imagem
-        save_as (str): Nome da imagem que será gerada
+        html_filename (str): Nome do arquivo HTML
+        save_as (str): Nome da imagem que será gerada (Sem extensão)
     """
-    chrome_options = Options()
+    options = ChromiumOptions()
+    # desabilita ambiente sandbox
+    options.add_argument("--no-sandbox")
     # executa o navegador sem interface gráfica
-    chrome_options.add_argument("--headless")
+    options.add_argument("--headless")
     # maximiza o navegador, para ocupar toda a tela
-    chrome_options.add_argument("--start-maximized")
+    options.add_argument("--start-maximized")
+    # desabilita a aceleração de hardware por GPU
+    options.add_argument("--disable-gpu")
 
-    driver = webdriver.Chrome(options=chrome_options)
-    # driver = webdriver.ChromiumEdge(options=chrome_options)
+    driver = webdriver.ChromiumEdge(options=options)
 
-    # html_file = Path.cwd() / f"{html_content}.html"
-    # driver.get(html_file.as_uri())
-    driver.get(f"data:text/html;charset=utf-8,{html_content}")
+    html_file = Path.cwd() / f"tmp/{html_filename}"
+
+    driver.get(html_file.as_uri())
 
     height = driver.execute_script("return document.documentElement.scrollHeight")
     width = driver.execute_script("return document.documentElement.scrollWidth")
@@ -29,5 +33,5 @@ def html_to_image(html_content: str, save_as: str):
 
     time.sleep(1)
 
-    driver.save_screenshot(f"{save_as}.png")
+    driver.save_screenshot(f"tmp/{save_as}.png")
     driver.quit()
