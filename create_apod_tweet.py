@@ -5,11 +5,11 @@ from datetime import datetime
 import coloredlogs
 import requests
 from dotenv import load_dotenv
-from html2image import Html2Image
 from src.api.nasa import Nasa
 from src.api.twitter import Twitter
 from src.utils.text import text_bold, text_translator
 from src.utils.date import date_describe
+from src.utils.image import html_to_image
 
 
 # load envs from .env file
@@ -76,6 +76,35 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     return message
 
 
+def __apod_explanation_image(title: str, date: str, explanation: str):
+    """Realiza a geração da imagem com a explicação completa do APOD do dia
+
+    Args:
+        title (str): Título da explicação
+        date (str): Data do APOD já formatada
+        explanation (str): Explicação
+    """
+    with open("apod_card.html", encoding="UTF-8") as file:
+        card_html = file.read()
+
+        explanation = explanation.replace("  ", "<br>")
+        explanation = explanation.replace(
+            "<br><br>", '<div style="margin: 4px;"></div>'
+        )
+        translated_explanation = text_translator(explanation)
+
+        card_html = card_html.replace("var_title", title)
+        card_html = card_html.replace("var_explanation", translated_explanation)
+        card_html = card_html.replace("var_date", date)
+
+        with open("tmp/apod.html", "w", encoding="utf-8") as html_file:
+            html_file.write(card_html)
+            html_file.close()
+
+        html_to_image("apod.html", "apod")
+        file.close()
+
+
 def __main():
     """Criação do tweet sobre o APOD"""
     start = datetime.now()
@@ -116,90 +145,28 @@ def __main():
             logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
-        width = 950
-        height = 1000
-        hti = Html2Image(
-            temp_path="tmp",
-            output_path="tmp",
-            size=(width, height),
-            custom_flags=["--no-sandbox", "--disable-gpu"],
-            disable_logging=True,
+        __apod_explanation_image(
+            translated_title, formatted_date, apod_info["explanation"]
         )
 
-        with open("apod_card.html", encoding="UTF-8") as f:
-            card_html = f.read()
+        apod_explanation_message = ""
+        if apod_info.get("copyright"):
+            copyright_to = apod_info["copyright"].replace("\n", "")
+            apod_explanation_message = f"Copyright: {copyright_to}"
+        apod_explanation_message += "\n\nExplicação detalhada ⤵️"
 
-            explanation = apod_info["explanation"]
-            explanation = explanation.replace("  ", "<br>")
-            explanation = explanation.replace(
-                "<br><br>", '<div style="margin: 4px;"></div>'
+        if is_debug:
+            logging.info("### Apod Explanation Message")
+            logging.info(apod_explanation_message)
+        else:
+            tweet_id = twitter_api.create_tweet(
+                in_reply_to=tweet_id,
+                message=apod_explanation_message,
+                filename="apod.png",
             )
-            translated_explanation = text_translator(explanation)
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
-            # ajusta o tamanho da fonte do título de acordo com número de palavras
-            default_head_font_size = "38px"
-            if len(translated_title) > 33:
-                default_head_font_size = "30px"
-            if len(translated_title) > 42:
-                default_head_font_size = "25px"
-
-            # ajusta o tamanho da fonte de acordo com número de palavras
-            default_font_size = "40px"
-            if len(translated_explanation) > 600:
-                default_font_size = "36px"
-            if len(translated_explanation) > 800:
-                default_font_size = "34px"
-            if len(translated_explanation) > 900:
-                default_font_size = "32px"
-            if len(translated_explanation) > 1000:
-                default_font_size = "30px"
-            if len(translated_explanation) > 1100:
-                default_font_size = "29px"
-            if len(translated_explanation) > 1200:
-                default_font_size = "28px"
-            if len(translated_explanation) > 1300:
-                default_font_size = "27px"
-            if len(translated_explanation) > 1400:
-                default_font_size = "26px"
-            if len(translated_explanation) > 1500:
-                default_font_size = "20px"
-
-            logging.info(
-                f"Head: {default_head_font_size} | {len(translated_title)} words"
-            )
-            logging.info(
-                f"Body: {default_font_size} | {len(translated_explanation)} words"
-            )
-
-            card_html = card_html.replace("var_head_font_size", default_head_font_size)
-            card_html = card_html.replace("var_font_size", default_font_size)
-            card_html = card_html.replace("var_title", translated_title)
-            card_html = card_html.replace("var_explanation", translated_explanation)
-            card_html = card_html.replace("var_date", formatted_date)
-
-            hti.screenshot(html_str=card_html, save_as="apod.png")
-            f.close()
-
-            apod_explanation_message = ""
-            if apod_info.get("copyright"):
-                copyright_to = apod_info["copyright"].replace("\n", "")
-                apod_explanation_message = f"Copyright: {copyright_to}"
-            apod_explanation_message += "\n\nExplicação detalhada ⤵️"
-
-            if is_debug:
-                logging.info("### Apod Explanation Message")
-                logging.info(apod_explanation_message)
-            else:
-                tweet_id = twitter_api.create_tweet(
-                    in_reply_to=tweet_id,
-                    message=apod_explanation_message,
-                    filename="apod.png",
-                )
-                logging.warning(
-                    f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
-                )
-
-            logging.info("Tweet posted with success!")
+        logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
 
