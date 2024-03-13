@@ -3,6 +3,7 @@ services:
   twitter-bot-prod:
     build:
       context: .
-      dockerfile: ./Dockerfile.prod
+      dockerfile: ./Dockerfile
+      target: prod
     volumes:
       - .:/twitter-bot
