@@ -76,6 +76,35 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     return message
 
 
+def __apod_explanation_image(title: str, date: str, explanation: str):
+    """Realiza a geração da imagem com a explicação completa do APOD do dia
+
+    Args:
+        title (str): Título da explicação
+        date (str): Data do APOD já formatada
+        explanation (str): Explicação
+    """
+    with open("apod_card.html", encoding="UTF-8") as file:
+        card_html = file.read()
+
+        explanation = explanation.replace("  ", "<br>")
+        explanation = explanation.replace(
+            "<br><br>", '<div style="margin: 4px;"></div>'
+        )
+        translated_explanation = text_translator(explanation)
+
+        card_html = card_html.replace("var_title", title)
+        card_html = card_html.replace("var_explanation", translated_explanation)
+        card_html = card_html.replace("var_date", date)
+
+        with open("tmp/apod.html", "w", encoding="utf-8") as html_file:
+            html_file.write(card_html)
+            html_file.close()
+
+        html_to_image("apod.html", "apod")
+        file.close()
+
+
 def __main():
     """Criação do tweet sobre o APOD"""
     start = datetime.now()
@@ -116,47 +145,28 @@ def __main():
             logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
-        with open("apod_card.html", encoding="UTF-8") as file:
-            card_html = file.read()
+        __apod_explanation_image(
+            translated_title, formatted_date, apod_info["explanation"]
+        )
 
-            explanation = apod_info["explanation"]
-            explanation = explanation.replace("  ", "<br>")
-            explanation = explanation.replace(
-                "<br><br>", '<div style="margin: 4px;"></div>'
+        apod_explanation_message = ""
+        if apod_info.get("copyright"):
+            copyright_to = apod_info["copyright"].replace("\n", "")
+            apod_explanation_message = f"Copyright: {copyright_to}"
+        apod_explanation_message += "\n\nExplicação detalhada ⤵️"
+
+        if is_debug:
+            logging.info("### Apod Explanation Message")
+            logging.info(apod_explanation_message)
+        else:
+            tweet_id = twitter_api.create_tweet(
+                in_reply_to=tweet_id,
+                message=apod_explanation_message,
+                filename="apod.png",
             )
-            translated_explanation = text_translator(explanation)
+            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
-            card_html = card_html.replace("var_title", translated_title)
-            card_html = card_html.replace("var_explanation", translated_explanation)
-            card_html = card_html.replace("var_date", formatted_date)
-
-            with open("tmp/apod.html", "w", encoding="utf-8") as html_file:
-                html_file.write(card_html)
-                html_file.close()
-
-            html_to_image("apod.html", "apod")
-            file.close()
-
-            apod_explanation_message = ""
-            if apod_info.get("copyright"):
-                copyright_to = apod_info["copyright"].replace("\n", "")
-                apod_explanation_message = f"Copyright: {copyright_to}"
-            apod_explanation_message += "\n\nExplicação detalhada ⤵️"
-
-            if is_debug:
-                logging.info("### Apod Explanation Message")
-                logging.info(apod_explanation_message)
-            else:
-                tweet_id = twitter_api.create_tweet(
-                    in_reply_to=tweet_id,
-                    message=apod_explanation_message,
-                    filename="apod.png",
-                )
-                logging.warning(
-                    f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}"
-                )
-
-            logging.info("Tweet posted with success!")
+        logging.info("Tweet posted with success!")
     except Exception as error:
         logging.error(error)
 
