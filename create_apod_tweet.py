@@ -5,11 +5,11 @@ from datetime import datetime
 import coloredlogs
 import requests
 from dotenv import load_dotenv
-from html2image import Html2Image
 from src.api.nasa import Nasa
 from src.api.twitter import Twitter
 from src.utils.text import text_bold, text_translator
 from src.utils.date import date_describe
+from src.utils.image import html_to_image
 
 
 # load envs from .env file
@@ -116,18 +116,8 @@ def __main():
             logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
 
         # criação do tweet com a imagem da explicação em português
-        width = 950
-        height = 1000
-        hti = Html2Image(
-            temp_path="tmp",
-            output_path="tmp",
-            size=(width, height),
-            custom_flags=["--no-sandbox", "--disable-gpu"],
-            disable_logging=True,
-        )
-
-        with open("apod_card.html", encoding="UTF-8") as f:
-            card_html = f.read()
+        with open("apod_card.html", encoding="UTF-8") as file:
+            card_html = file.read()
 
             explanation = apod_info["explanation"]
             explanation = explanation.replace("  ", "<br>")
@@ -177,8 +167,8 @@ def __main():
             card_html = card_html.replace("var_explanation", translated_explanation)
             card_html = card_html.replace("var_date", formatted_date)
 
-            hti.screenshot(html_str=card_html, save_as="apod.png")
-            f.close()
+            html_to_image(card_html, "apod")
+            file.close()
 
             apod_explanation_message = ""
             if apod_info.get("copyright"):

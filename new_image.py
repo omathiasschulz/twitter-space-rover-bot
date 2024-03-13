@@ -1,24 +1,25 @@
 import time
-from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
+# executa o navegador sem interface gráfica
 chrome_options.add_argument("--headless")
+# maximiza o navegador, para ocupar toda a tela
 chrome_options.add_argument("--start-maximized")
 
-driver = webdriver.Chrome(options=chrome_options)
+# driver = webdriver.Chrome(options=chrome_options)
+driver = webdriver.ChromiumEdge(options=chrome_options)
 
-html_file = Path.cwd() / "new_image.html"
+html_content = "<html><head></head><body><h1>Conteúdo HTML</h1></body></html>"
 
-driver.get(html_file.as_uri())
-
-time.sleep(2)
+driver.get(f"data:text/html;charset=utf-8,{html_content}")
 
 height = driver.execute_script("return document.documentElement.scrollHeight")
 width = driver.execute_script("return document.documentElement.scrollWidth")
 driver.set_window_size(width, height)
 
-time.sleep(2)
-driver.save_screenshot("screenshot2.png")
+time.sleep(1)
+
+driver.save_screenshot("apod_5.png")
 driver.quit()
