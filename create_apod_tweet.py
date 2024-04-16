@@ -114,6 +114,7 @@ def __main():
 
     try:
         nasa_api = Nasa()
+        # apod_info = nasa_api.apod("2024-04-14")
         apod_info = nasa_api.apod()
         logging.info(f"APOD > {apod_info}")
 
@@ -135,6 +136,12 @@ def __main():
                     f"Link HD da imagem não está funcionando... {apod_info['hdurl']}"
                 )
                 file_url = apod_info["url"]
+        else:
+            logging.info("Is video")
+            #
+            # media_category parameter for API.media_upload as "tweet_video"
+            # media = api.media_upload("test.mp4")
+            #
 
         if is_debug:
             logging.info("### Message")
