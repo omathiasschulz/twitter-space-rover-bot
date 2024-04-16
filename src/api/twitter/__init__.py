@@ -63,7 +63,7 @@ class Twitter:
 
         if file_url:
             file_url_filename = f"tmp/{uuid.uuid4()}.jpg"
-            request = requests.get(file_url, stream=True, timeout=5)
+            request = requests.get(file_url, stream=True, timeout=10)
 
             with open(file_url_filename, "wb") as image:
                 for chunk in request:
