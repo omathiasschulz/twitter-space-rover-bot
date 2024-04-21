@@ -9,8 +9,6 @@ class Nasa:
 
     def __init__(self) -> None:
         """Construtor da classe Nasa"""
-        # default timeout 5 seconds
-        self.default_timeout = 5
         self.api_key = os.getenv("NASA_API_KEY")
 
     def apod(self, date: str = None) -> dict:
@@ -29,7 +27,7 @@ class Nasa:
 
         response = requests.get(
             f"{self.NASA_API_URL}/planetary/apod?api_key={self.api_key}{extra_filters}",
-            timeout=self.default_timeout,
+            timeout=10,
         )
 
         return response.json()

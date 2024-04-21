@@ -52,9 +52,6 @@ def __apod_message(apod_info: dict, translated_title: str, formatted_date: str) 
     build_message = []
     build_message.append(f"{translated_title} ({apod_info['title']}) 🌌")
 
-    if apod_info["media_type"] == "video":
-        build_message.append(f"\nAssista ao vídeo: {apod_info['url']}")
-
     build_message.append(
         "\nFoto Astronômica do Dia (Astronomy Picture of the Day - APOD)"
     )
@@ -105,6 +102,89 @@ def __apod_explanation_image(title: str, date: str, explanation: str):
         file.close()
 
 
+def __create_main_tweet(
+    twitter_api: Twitter, translated_title: str, formatted_date: str, apod_info: dict
+) -> str:
+    """Realiza a criação do tweet principal do APOD
+
+    Args:
+        twitter_api (Twitter): Comunicação com API do twitter
+        translated_title (str): Título do APOD traduzido
+        formatted_date (str): Data do APOD traduzido
+        apod_info (dict): Informações do APOD
+
+    Returns:
+        str: Retorna o ID do tweet
+    """
+    message = __apod_message(apod_info, translated_title, formatted_date)
+
+    if is_debug:
+        logging.info("### Message")
+        logging.info(message)
+        return None
+
+    media_ids = []
+    # valida se é imagem ou vídeo
+    if apod_info["media_type"] != "video":
+        logging.info("APOD is image")
+
+        # valida se o link HD da imagem está funcionando
+        if apod_info.get("hdurl") and __check_link_is_valid(apod_info["hdurl"]):
+            media_ids.append(twitter_api.upload_image_from_url(apod_info["hdurl"]))
+        else:
+            logging.warning(
+                f"Link HD da imagem não está funcionando... {apod_info['hdurl']}"
+            )
+            media_ids.append(twitter_api.upload_image_from_url(apod_info["url"]))
+    else:
+        logging.info("APOD is video")
+        media_ids.append(twitter_api.upload_video_from_url(apod_info["url"]))
+
+    tweet_id = twitter_api.create_tweet(message=message, media_ids=media_ids)
+    logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+    return tweet_id
+
+
+def __create_secondary_tweet(
+    twitter_api: Twitter,
+    translated_title: str,
+    formatted_date: str,
+    apod_info: dict,
+    tweet_id: str,
+):
+    """Realiza a criação do tweet secundário do APOD
+
+    Args:
+        twitter_api (Twitter): Comunicação com API do twitter
+        translated_title (str): Título do APOD traduzido
+        formatted_date (str): Data do APOD traduzido
+        apod_info (dict): Informações do APOD
+        tweet_id (str): ID do tweet principal
+    """
+    __apod_explanation_image(translated_title, formatted_date, apod_info["explanation"])
+
+    apod_explanation_message = ""
+    if apod_info.get("copyright"):
+        copyright_to = apod_info["copyright"].replace("\n", "")
+        apod_explanation_message = f"Copyright: {copyright_to}"
+    apod_explanation_message += "\n\nExplicação detalhada ⤵️"
+
+    if is_debug:
+        logging.info("### Apod Explanation Message")
+        logging.info(apod_explanation_message)
+        return
+
+    media_ids = [twitter_api.upload_image_from_tmp("apod.png")]
+
+    tweet_id = twitter_api.create_tweet(
+        in_reply_to=tweet_id,
+        message=apod_explanation_message,
+        media_ids=media_ids,
+    )
+
+    logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+
+
 def __main():
     """Criação do tweet sobre o APOD"""
     start = datetime.now()
@@ -113,58 +193,21 @@ def __main():
         logging.warning("[DEVELOPMENT MODE]")
 
     try:
+        twitter_api = Twitter()
         nasa_api = Nasa()
         apod_info = nasa_api.apod()
         logging.info(f"APOD > {apod_info}")
 
-        # criação do tweet principal
         translated_title = text_translator(apod_info["title"])
-
         formatted_date = date_describe(apod_info["date"])
 
-        message = __apod_message(apod_info, translated_title, formatted_date)
-
-        file_url = None
-        # se o apod do dia for vídeo, não possui imagem
-        if apod_info["media_type"] != "video":
-            # valida se o link HD da imagem está funcionando
-            if apod_info.get("hdurl") and __check_link_is_valid(apod_info["hdurl"]):
-                file_url = apod_info["hdurl"]
-            else:
-                logging.warning(
-                    f"Link HD da imagem não está funcionando... {apod_info['hdurl']}"
-                )
-                file_url = apod_info["url"]
-
-        if is_debug:
-            logging.info("### Message")
-            logging.info(message)
-        else:
-            twitter_api = Twitter()
-            tweet_id = twitter_api.create_tweet(message=message, file_url=file_url)
-            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
-
-        # criação do tweet com a imagem da explicação em português
-        __apod_explanation_image(
-            translated_title, formatted_date, apod_info["explanation"]
+        tweet_id = __create_main_tweet(
+            twitter_api, translated_title, formatted_date, apod_info
         )
 
-        apod_explanation_message = ""
-        if apod_info.get("copyright"):
-            copyright_to = apod_info["copyright"].replace("\n", "")
-            apod_explanation_message = f"Copyright: {copyright_to}"
-        apod_explanation_message += "\n\nExplicação detalhada ⤵️"
-
-        if is_debug:
-            logging.info("### Apod Explanation Message")
-            logging.info(apod_explanation_message)
-        else:
-            tweet_id = twitter_api.create_tweet(
-                in_reply_to=tweet_id,
-                message=apod_explanation_message,
-                filename="apod.png",
-            )
-            logging.warning(f"TWEET > https://x.com/SpaceRoverBot/status/{tweet_id}")
+        __create_secondary_tweet(
+            twitter_api, translated_title, formatted_date, apod_info, tweet_id
+        )
 
         logging.info("Tweet posted with success!")
     except Exception as error:
