@@ -195,8 +195,7 @@ def __main():
     try:
         twitter_api = Twitter()
         nasa_api = Nasa()
-        apod_info = nasa_api.apod("2024-04-14")
-        # apod_info = nasa_api.apod()
+        apod_info = nasa_api.apod()
         logging.info(f"APOD > {apod_info}")
 
         translated_title = text_translator(apod_info["title"])
